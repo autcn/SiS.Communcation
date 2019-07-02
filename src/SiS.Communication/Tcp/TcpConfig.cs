@@ -29,12 +29,14 @@
         public int SocketAsyncBufferSize { get; set; } = 16 * 1024;
 
         /// <summary>
-        /// Gets or sets the limit speed for receiving. If the value is less or equal to 0,receiving speed control is disabled.The default is -1.
+        /// Gets or sets the limit speed for receiving, in bytes per second. 
+        /// If the value is less or equal to 0,receiving speed control is disabled.The default is -1.
         /// </summary>
         public int ReceiveDataMaxSpeed { get; set; } = -1;
 
         /// <summary>
-        /// Gets or sets the limit speed for sending. If the value is less or equal to 0, sending speed control is disabled.The default is -1.
+        /// Gets or sets the limit speed for sending, in bytes per second. 
+        /// If the value is less or equal to 0, sending speed control is disabled.The default is -1.
         /// </summary>
         public int SendDataMaxSpeed { get; set; } = -1;
 

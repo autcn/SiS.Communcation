@@ -321,7 +321,6 @@ public class TcpModelServerViewModel : ServerBaseViewModel
         {
             if (!string.IsNullOrWhiteSpace(ServerSendText))
             {
-                //_tcpServer.SendText(_serverClientID, ServerSendText.Trim());
                 ServerMessage serverMessage = new ServerMessage()
                 {
                     Title = "test",
@@ -420,6 +419,23 @@ public class TcpModelClientViewModel : ClientBaseViewModel
     {
         _tcpClient.Close();
     }
+}
+```
+<br>  
+
+### 4. Speed Control
+The server has a very useful feature for speed limit.
+The default limit speed is 10MB/s for each client. To change the default limit speed , see the following code:
+``` CSharp
+private void StartServer()
+{
+    TcpServerConfig serverConfig = new TcpServerConfig()
+    {
+        //To disable speed limit, set the value to -1
+        ReceiveDataMaxSpeed = 5 * 1024 * 1024,
+        SendDataMaxSpeed = 5 * 1024 * 1024
+    };
+    _tcpServer.Start(9999, serverConfig);
 }
 ```
 
