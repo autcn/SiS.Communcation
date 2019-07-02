@@ -1,0 +1,24 @@
+﻿<Window x:Class="TcpFile.Demo.ServerWnd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TcpFile.Demo"
+        mc:Ignorable="d" Left="0" Top="0"
+        Title="ServerWnd" Height="350" Width="400">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Height="30" >
+            <Button Content="Start Server" Width="100" x:Name="btnStartServer" Click="BtnStartServer_Click" />
+            <Button Content="Stop Server" Width="100" x:Name="btnStopServer" Click="BtnStopServer_Click" Margin="10,0,0,0" />
+        </StackPanel>
+        <TextBox Grid.Row="1" AcceptsReturn="True" Margin="0,8,0,0" x:Name="tbxLog" VerticalScrollBarVisibility="Auto">
+
+        </TextBox>
+    </Grid>
+
+
+</Window>

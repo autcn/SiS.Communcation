@@ -1,0 +1,61 @@
+﻿<Window x:Class="TcpFile.Demo.ClientWnd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TcpFile.Demo"
+        mc:Ignorable="d" Left="390" Top="0" Loaded="Window_Loaded"
+        Title="ClientWnd" Height="550" Width="600">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Height="30" Margin="0,8,0,0">
+            <Label Content="Client:" Width="60" />
+            <Label Content="Connect" Foreground="Black" Width="70" x:Name="btnConnect" MouseLeftButtonUp="BtnConnect_Click" HorizontalContentAlignment="Center"
+                   Background="#DDDDDD" BorderThickness="1" BorderBrush="#7F7F7F" />
+            <Button Content="Disconnect" Width="80" Margin="10,0,0,0" x:Name="btnDisconnect" Click="BtnDisconnect_Click" />
+            <Button Content="Upload File" Width="80" Margin="10,0,0,0" x:Name="btnUploadFile" Click="BtnUploadFile_Click" />
+            <Button Content="Cancel" Width="80" Margin="10,0,0,0" x:Name="btnCancelUpload" Click="BtnUploadFileCancel_Click" />
+            <Label x:Name="lblRate" VerticalContentAlignment="Center" Foreground="Blue" Margin="10,0,0,0" />
+        </StackPanel>
+        <ProgressBar x:Name="progressBar" Grid.Row="1" Height="30" Margin="0,8,0,0" Minimum="0" Maximum="100" />
+        <RichTextBox Grid.Row="2" Margin="0,8,0,0" x:Name="tbxLog" VerticalScrollBarVisibility="Auto"  />
+        <Grid Grid.Row="3" Height="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="Input Message:"  VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                <Button Content="Font"  FontWeight="Bold" Width="80" Height="24" Click="btnFont_Click" />
+                <!--<Label Content="FontSize:" VerticalAlignment="Center" />
+                <ComboBox Width="50" Height="24" HorizontalContentAlignment="Center" FontSize="13" x:Name="cbxFontSize" />
+                <Label Content="FontFamily:" VerticalAlignment="Center" />
+                <ComboBox Width="100" Height="24" HorizontalContentAlignment="Center" FontSize="13" x:Name="cbxFontFamily" />
+                <Label Content="Color:" VerticalAlignment="Center" />
+                <ComboBox Width="50" Height="24" HorizontalContentAlignment="Center" FontSize="13" x:Name="cbxFontColor" />-->
+            </StackPanel>
+
+        </Grid>
+        <TextBox Grid.Row="4" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" x:Name="tbxInputMessage"
+                FontSize="{Binding ElementName=cbxFonts,Path=SelectedItem}" />
+        <Grid  Grid.Row="5" Height=" 30" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Name:" />
+                <TextBox x:Name="tbxName" Width="100" Text="Jack" VerticalContentAlignment="Center" FontSize="14" HorizontalContentAlignment="Center" />
+            </StackPanel>
+            <Button Grid.Column="1" x:Name="btnSendMessage" Click="BtnSendMessage_Click" Content="发送" Width="80" HorizontalAlignment="Right" />
+        </Grid>
+    </Grid>
+</Window>

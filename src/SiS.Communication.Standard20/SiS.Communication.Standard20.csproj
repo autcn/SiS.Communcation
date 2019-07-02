@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>SiS.Communication.Standard20</AssemblyName>
+    <RootNamespace>SiS.Communication</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\bin\Release\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Common\.gitkeep" />
+    <None Remove="Process\.gitkeep" />
+    <None Remove="Tcp\.gitkeep" />
+    <None Remove="Spliter\.gitkeep" />
+    <None Remove="Udp\.gitkeep" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SiS.Communication\Business\GeneralMessage.cs" Link="Business\GeneralMessage.cs" />
+    <Compile Include="..\SiS.Communication\Business\ModelMessageBase.cs" Link="Business\ModelMessageBase.cs" />
+    <Compile Include="..\SiS.Communication\Business\ModelMessageConvert.cs" Link="Business\ModelMessageConvert.cs" />
+    <Compile Include="..\SiS.Communication\Business\RelayRequestMessageSender.cs" Link="Business\RelayRequestMessageSender.cs" />
+    <Compile Include="..\SiS.Communication\Business\RequestMessageBase.cs" Link="Business\RequestMessageBase.cs" />
+    <Compile Include="..\SiS.Communication\Business\RequestResponseAgent.cs" Link="Business\RequestResponseAgent.cs" />
+    <Compile Include="..\SiS.Communication\Business\RequestResponseTask.cs" Link="Business\RequestResponseTask.cs" />
+    <Compile Include="..\SiS.Communication\Business\ResponseMessageBase.cs" Link="Business\ResponseMessageBase.cs" />
+    <Compile Include="..\SiS.Communication\Business\TcpModelClient.cs" Link="Business\TcpModelClient.cs" />
+    <Compile Include="..\SiS.Communication\Business\TcpModelServer.cs" Link="Business\TcpModelServer.cs" />
+    <Compile Include="..\SiS.Communication\Common\ArraySegmentEx.cs" Link="Common\ArraySegmentEx.cs" />
+    <Compile Include="..\SiS.Communication\Common\ByteArrayHelper.cs" Link="Common\ByteArrayHelper.cs" />
+    <Compile Include="..\SiS.Communication\Common\ClientStatus.cs" Link="Common\ClientStatus.cs" />
+    <Compile Include="..\SiS.Communication\Common\DynamicBuffer.cs" Link="Common\DynamicBuffer.cs" />
+    <Compile Include="..\SiS.Communication\Common\Exceptions.cs" Link="Common\Exceptions.cs" />
+    <Compile Include="..\SiS.Communication\Common\ILog.cs" Link="Common\ILog.cs" />
+    <Compile Include="..\SiS.Communication\Common\LogWriter.cs" Link="Common\LogWriter.cs" />
+    <Compile Include="..\SiS.Communication\Common\RingQueue.cs" Link="Common\RingQueue.cs" />
+    <Compile Include="..\SiS.Communication\Common\SingleThreadTaskScheduler.cs" Link="Common\SingleThreadTaskScheduler.cs" />
+    <Compile Include="..\SiS.Communication\Common\SpeedController.cs" Link="Common\SpeedController.cs" />
+    <Compile Include="..\SiS.Communication\Common\ThreadEx.cs" Link="Common\ThreadEx.cs" />
+    <Compile Include="..\SiS.Communication\Process\PipeBase.cs" Link="Process\PipeBase.cs" />
+    <Compile Include="..\SiS.Communication\Process\PipeClient.cs" Link="Process\PipeClient.cs" />
+    <Compile Include="..\SiS.Communication\Process\PipeServer.cs" Link="Process\PipeServer.cs" />
+    <Compile Include="..\SiS.Communication\Process\ProcessUtility.cs" Link="Process\ProcessUtility.cs" />
+    <Compile Include="..\SiS.Communication\Process\ShareMemoryBase.cs" Link="Process\ShareMemoryBase.cs" />
+    <Compile Include="..\SiS.Communication\Process\ShareMemoryDuplex.cs" Link="Process\ShareMemoryDuplex.cs" />
+    <Compile Include="..\SiS.Communication\Process\ShareMemoryReader.cs" Link="Process\ShareMemoryReader.cs" />
+    <Compile Include="..\SiS.Communication\Process\ShareMemoryWriter.cs" Link="Process\ShareMemoryWriter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\EndMarkPacketSpliter.cs" Link="Spliter\EndMarkPacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\HeaderPacketSpliter.cs" Link="Spliter\HeaderPacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\IPacketSpliter.cs" Link="Spliter\IPacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\NativePacketSpliter.cs" Link="Spliter\NativePacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\SimplePacketSpliter.cs" Link="Spliter\SimplePacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\ClientContext.cs" Link="Tcp\ClientContext.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\ClientContextPool.cs" Link="Tcp\ClientContextPool.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\ClientsHandler.cs" Link="Tcp\ClientsHandler.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\GroupTransmitMessage.cs" Link="Tcp\GroupTransmitMessage.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\JoinGroupMessage.cs" Link="Tcp\JoinGroupMessage.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpBase.cs" Link="Tcp\TcpBase.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpClientConfig.cs" Link="Tcp\TcpClientConfig.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpClientEx.cs" Link="Tcp\TcpClientEx.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpConfig.cs" Link="Tcp\TcpConfig.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpRawMessage.cs" Link="Tcp\TcpRawMessage.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpServer.cs" Link="Tcp\TcpServer.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpServerConfig.cs" Link="Tcp\TcpServerConfig.cs" />
+    <Compile Include="..\SiS.Communication\Tcp\TcpUtility.cs" Link="Tcp\TcpUtility.cs" />
+    <Compile Include="..\SiS.Communication\Udp\UdpMessage.cs" Link="Udp\UdpMessage.cs" />
+    <Compile Include="..\SiS.Communication\Udp\UdpServer.cs" Link="Udp\UdpServer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Process\" />
+    <Folder Include="Spliter\" />
+    <Folder Include="Business\" />
+  </ItemGroup>
+
+</Project>

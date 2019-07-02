@@ -1,0 +1,50 @@
+﻿<Window x:Class="SiS.Communication.Demo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SiS.Communication.Demo"
+        mc:Ignorable="d" Loaded="Window_Loaded"
+        Title="MainWindow" Height="550" Width="1180" FontSize="14">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:TcpBasicViewModel}">
+            <local:PageBasicView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:TcpGroupViewModel}">
+            <local:TcpGroupView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:TcpModelViewModel}">
+            <local:PageBasicView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:PipeViewModel}">
+            <local:PageBasicView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:ShareMemoryViewModel}">
+            <local:PageBasicView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:ShareMemoryDuplexViewModel}">
+            <local:PageBasicView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:UdpViewModel}">
+            <local:UdpView />
+        </DataTemplate>
+
+    </Window.Resources>
+    <Grid Margin="8">
+        <TabControl x:Name="tabCtrl" TabStripPlacement="Left">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid  Height="30">
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Path=Title}" />
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+        </TabControl>
+    </Grid>
+</Window>

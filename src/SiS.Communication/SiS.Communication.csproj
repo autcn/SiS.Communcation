@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{91BA755B-D3CD-47B7-9990-AC2749EC84BB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SiS.Communication</RootNamespace>
+    <AssemblyName>SiS.Communication</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Business\GeneralMessage.cs" />
+    <Compile Include="Business\ModelMessageBase.cs" />
+    <Compile Include="Business\ModelMessageConvert.cs" />
+    <Compile Include="Business\RelayRequestMessageSender.cs" />
+    <Compile Include="Business\ResponseMessageBase.cs" />
+    <Compile Include="Business\RequestMessageBase.cs" />
+    <Compile Include="Business\RequestResponseTask.cs" />
+    <Compile Include="Business\RequestResponseAgent.cs" />
+    <Compile Include="Business\TcpModelServer.cs" />
+    <Compile Include="Business\TcpModelClient.cs" />
+    <Compile Include="Common\ClientStatus.cs" />
+    <Compile Include="Common\DynamicBuffer.cs" />
+    <Compile Include="Common\Exceptions.cs" />
+    <Compile Include="Common\ILog.cs" />
+    <Compile Include="Common\LogWriter.cs" />
+    <Compile Include="Common\RingQueue.cs" />
+    <Compile Include="Common\SingleThreadTaskScheduler.cs" />
+    <Compile Include="Common\SpeedController.cs" />
+    <Compile Include="Common\ArraySegmentEx.cs" />
+    <Compile Include="Common\ThreadEx.cs" />
+    <Compile Include="Common\ByteArrayHelper.cs" />
+    <Compile Include="Process\PipeBase.cs" />
+    <Compile Include="Process\PipeClient.cs" />
+    <Compile Include="Process\PipeServer.cs" />
+    <Compile Include="Process\ProcessUtility.cs" />
+    <Compile Include="Process\ShareMemoryDuplex.cs" />
+    <Compile Include="Process\ShareMemoryWriter.cs" />
+    <Compile Include="Process\ShareMemoryReader.cs" />
+    <Compile Include="Process\ShareMemoryBase.cs" />
+    <Compile Include="Tcp\ClientContext.cs" />
+    <Compile Include="Tcp\ClientsHandler.cs" />
+    <Compile Include="Tcp\JoinGroupMessage.cs" />
+    <Compile Include="Tcp\ClientContextPool.cs" />
+    <Compile Include="Tcp\TcpBase.cs" />
+    <Compile Include="Tcp\TcpClientEx.cs" />
+    <Compile Include="Tcp\TcpConfig.cs" />
+    <Compile Include="Tcp\TcpServer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tcp\TcpClientConfig.cs" />
+    <Compile Include="Tcp\TcpServerConfig.cs" />
+    <Compile Include="Tcp\TcpUtility.cs" />
+    <Compile Include="Tcp\GroupTransmitMessage.cs" />
+    <Compile Include="Tcp\TcpRawMessage.cs" />
+    <Compile Include="Spliter\EndMarkPacketSpliter.cs" />
+    <Compile Include="Spliter\IPacketSpliter.cs" />
+    <Compile Include="Spliter\NativePacketSpliter.cs" />
+    <Compile Include="Spliter\HeaderPacketSpliter.cs" />
+    <Compile Include="Spliter\SimplePacketSpliter.cs" />
+    <Compile Include="Udp\UdpServer.cs" />
+    <Compile Include="Udp\UdpMessage.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
