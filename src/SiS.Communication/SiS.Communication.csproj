@@ -85,7 +85,7 @@
     <Compile Include="Tcp\TcpRawMessage.cs" />
     <Compile Include="Spliter\EndMarkPacketSpliter.cs" />
     <Compile Include="Spliter\IPacketSpliter.cs" />
-    <Compile Include="Spliter\NativePacketSpliter.cs" />
+    <Compile Include="Spliter\RawPacketSpliter.cs" />
     <Compile Include="Spliter\HeaderPacketSpliter.cs" />
     <Compile Include="Spliter\SimplePacketSpliter.cs" />
     <Compile Include="Udp\UdpServer.cs" />

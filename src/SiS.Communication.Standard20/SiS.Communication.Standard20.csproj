@@ -55,7 +55,7 @@
     <Compile Include="..\SiS.Communication\Spliter\EndMarkPacketSpliter.cs" Link="Spliter\EndMarkPacketSpliter.cs" />
     <Compile Include="..\SiS.Communication\Spliter\HeaderPacketSpliter.cs" Link="Spliter\HeaderPacketSpliter.cs" />
     <Compile Include="..\SiS.Communication\Spliter\IPacketSpliter.cs" Link="Spliter\IPacketSpliter.cs" />
-    <Compile Include="..\SiS.Communication\Spliter\NativePacketSpliter.cs" Link="Spliter\NativePacketSpliter.cs" />
+    <Compile Include="..\SiS.Communication\Spliter\RawPacketSpliter.cs" Link="Spliter\RawPacketSpliter.cs" />
     <Compile Include="..\SiS.Communication\Spliter\SimplePacketSpliter.cs" Link="Spliter\SimplePacketSpliter.cs" />
     <Compile Include="..\SiS.Communication\Tcp\ClientContext.cs" Link="Tcp\ClientContext.cs" />
     <Compile Include="..\SiS.Communication\Tcp\ClientContextPool.cs" Link="Tcp\ClientContextPool.cs" />

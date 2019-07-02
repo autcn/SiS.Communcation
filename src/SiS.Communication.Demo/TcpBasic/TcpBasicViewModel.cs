@@ -55,7 +55,7 @@ namespace SiS.Communication.Demo
             IPacketSpliter endMarkSpliter = new EndMarkPacketSpliter(false, (byte)'\x04');
 
             //5.packet that do not need to be split
-            IPacketSpliter nativeSpliter = NativePacketSpliter.Default;
+            IPacketSpliter rawSpliter = RawPacketSpliter.Default;
 
             //_tcpServer = new TcpServer();
             _tcpServer = new TcpServer(simpleSpliter);
@@ -147,7 +147,7 @@ namespace SiS.Communication.Demo
             IPacketSpliter endMarkSpliter = new EndMarkPacketSpliter(false, (byte)'\x04');
 
             //5.packet that do not need to be split
-            IPacketSpliter nativeSpliter = NativePacketSpliter.Default;
+            IPacketSpliter rawSpliter = RawPacketSpliter.Default;
 
             //_tcpClient = new TcpClientEx(false);
             _tcpClient = new TcpClientEx(false, simpleSpliter);

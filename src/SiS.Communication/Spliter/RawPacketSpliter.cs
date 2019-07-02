@@ -6,14 +6,14 @@ namespace SiS.Communication.Spliter
     /// <summary>
     /// Represents an object that implements interface of IPacketSpliter, 
     /// which transmit all data with doing nothing.
-    /// |  Native Data Stream |
+    /// |  Raw Data Stream |
     /// </summary>
-    public class NativePacketSpliter : IPacketSpliter
+    public class RawPacketSpliter : IPacketSpliter
     {
         /// <summary>
-        /// The static default instance of SiS.Communication.Spliter.NativePacketSpliter
+        /// The static default instance of SiS.Communication.Spliter.RawPacketSpliter
         /// </summary>
-        public static NativePacketSpliter Default { get; private set; } = new NativePacketSpliter();
+        public static RawPacketSpliter Default { get; private set; } = new RawPacketSpliter();
 
         #region Public Functions
 

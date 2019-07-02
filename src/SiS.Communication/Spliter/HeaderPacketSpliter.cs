@@ -18,23 +18,23 @@ namespace SiS.Communication.Spliter
         /// Initializes a new instance of the SiS.Communication.Spliter.HeaderPacketSpliter
         /// </summary>
         /// <param name="useNetworkByteOrder">true to pack length in network byte order; otherwise, int host byte order.</param>
-        /// <param name="headerFlag">A 32-bit integer as packet header flag to prevent illegal network data./param>
-        public HeaderPacketSpliter(bool useNetworkByteOrder, UInt32 headerFlag)
+        /// <param name="headerTag">A 32-bit integer as packet header tag to prevent illegal network data./param>
+        public HeaderPacketSpliter(bool useNetworkByteOrder, UInt32 headerTag)
         {
             UseNetworkByteOrder = useNetworkByteOrder;
-            _headerFlag = headerFlag;
+            _headerTag = headerTag;
         }
 
         /// <summary>
         /// Initializes a new instance of the SiS.Communication.Spliter.HeaderPacketSpliter
         /// </summary>
-        /// <param name="headerFlag">A 32-bit integer as packet header flag to prevent illegal network data.</param>
-        public HeaderPacketSpliter(UInt32 headerFlag) : this(false, headerFlag) { }
+        /// <param name="headerTag">A 32-bit integer as packet header tag to prevent illegal network data.</param>
+        public HeaderPacketSpliter(UInt32 headerTag) : this(false, headerTag) { }
 
         #endregion
 
         #region Private Members
-        private UInt32 _headerFlag;
+        private UInt32 _headerTag;
 
         #endregion
 
@@ -68,7 +68,7 @@ namespace SiS.Communication.Spliter
         /// <param name="messageData">The message data to convert.</param>
         /// <param name="offset">The offset of the message data.</param>
         /// <param name="count">The count of bytes to convert.</param>
-        /// <returns>The converted packet with length and header flag if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
+        /// <returns>The converted packet with length and header tag if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
         public byte[] MakePacket(byte[] messageData, int offset, int count)
         {
             Contract.Requires(messageData != null && count > 0);
@@ -89,7 +89,7 @@ namespace SiS.Communication.Spliter
             }
             byte[] resData = new byte[8 + dataLen];
             //write header
-            Array.Copy(BitConverter.GetBytes(_headerFlag), 0, resData, 0, 4);
+            Array.Copy(BitConverter.GetBytes(_headerTag), 0, resData, 0, 4);
             //write message length
             Array.Copy(BitConverter.GetBytes(packetLen), 0, resData, 4, 4);
             if (dataLen > 0)
@@ -122,9 +122,9 @@ namespace SiS.Communication.Spliter
                     break;
                 }
                 //get header
-                uint headerFlag = BitConverter.ToUInt32(streamBuffer, pos);
+                uint headerTag = BitConverter.ToUInt32(streamBuffer, pos);
                 //compare headers to prevent network attack
-                if (headerFlag != _headerFlag)
+                if (headerTag != _headerTag)
                 {
                     throw new InvalidPacketException();
                 }
