@@ -1,7 +1,7 @@
 # SiS.Communcation
 ## Features
-This project provides a variety of communication components, including TCP, UDP, process communication. 
-TCP communication is very powerful, efficient and easy to use.
+This project provides a variety of communication components for .NET, including TCP, UDP, process communication. 
+TCP communication provided in libraries is very powerful, efficient and easy to use.
 ## TCP Usage
 ### 1.Basic Usage
 
@@ -131,7 +131,7 @@ Spliters are used to split stream data into packets. There are four packet split
 |:-:|:-:|
 | Length | Message Content |
 
-The length is a 32-bit integer in host network order. If network byte order is used,  please use the following code:
+The length is a 32-bit integer in host byte order. If network byte order is used,  please use the following code:
 ``` CSharp
             _tcpServer = new TcpServer(new SimplePacketSpliter(true));
 
