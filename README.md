@@ -4,12 +4,6 @@ This project provides a variety of communication components, including TCP, UDP,
 TCP communication is very powerful, efficient and easy to use.
 ## TCP Usage
 ### 1.Basic Usage
-Use the default spliter to split data stream into packets. 
-The default transport  packet structure is :  
-
-| 4 bytes| Length bytes |
-|:-:|:-:|
-| Length | Message Content |
 
 Server:  
 ``` CSharp
@@ -130,7 +124,7 @@ public partial class ClientWnd : Window
 }
 ```
 ### 2. Spliters
-There are four packet spliters built-in.  
+Spliters are used to split stream data into packets. There are four packet spliters built-in.  
 **2.1 SimplePacketSpliter**
 
 | 4 bytes| Length bytes |
@@ -202,7 +196,7 @@ If you don't want to split data into packets, the RawPacketSpliter is a good cho
 ### 3. Model Transmission
 It is very easy to transfer models using this library.  
 
-First, we should define a model convert. The example:
+First, we must define a model convert. For example:
 
 ``` CSharp
 using Newtonsoft.Json;
@@ -425,7 +419,7 @@ public class TcpModelClientViewModel : ClientBaseViewModel
 
 ### 4. Speed Control
 The server has a very useful feature for speed limit.
-The default limit speed is 10MB/s for each client. To change the default limit speed , see the following code:
+The default limit speed is 10MB/s for each client. To change the default value , see the following code:
 ``` CSharp
 private void StartServer()
 {
