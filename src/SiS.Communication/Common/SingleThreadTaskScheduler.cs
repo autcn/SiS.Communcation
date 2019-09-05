@@ -95,9 +95,9 @@ namespace SiS.Communication
                 throw new Exception("can not run a disposed scheduler");
             }
             _cancellSource = new CancellationTokenSource();
+            _isRunning = true;
             _workThread = ThreadEx.Start(() =>
             {
-                _isRunning = true;
                 while (_isRunning)
                 {
                     Task task = null;

@@ -139,6 +139,7 @@ namespace SiS.Communication.Tcp
                 else
                 {
                     _logger?.Warn($"sockAsyncArgs got an error: {sockAsyncArgs.SocketError.ToString()}");
+                    CloseClient(clientID);
                 }
             }
             else
