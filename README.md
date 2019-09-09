@@ -432,5 +432,375 @@ private void StartServer()
     _tcpServer.Start(9999, serverConfig);
 }
 ```
+<br>
 
+## UDP Usage
+The UdpServer class is provided for UDP Communication. It uses a receving queue internally to avoid packet loss. 
+It's also very easy to use multicast.
+<br>
 
+Server:
+``` CSharp
+using SiS.Communication.Udp;
+using System.Net;
+
+namespace SiS.Communication.Demo
+{
+    public class UdpServerViewModel
+    {
+        public UdpServerViewModel()
+        {
+            _udpServer = new UdpServer();
+            _udpServer.MessageReceived += _udpServer_MessageReceived;
+        }
+		
+        private bool _useMulticast = true;
+        private UdpServer _udpServer;
+
+        private void _udpServer_MessageReceived(object sender, UdpMessageReceivedEventArgs args)
+        {
+            string text = _udpServer.TextEncoding.GetString(args.Message.MessageData);
+            //ServerRecvText += text + "\r\n";
+        }
+
+        public void SendGroupMessage()
+        {
+            if (_udpServer.IsRunning)
+            {
+                byte[] messageData = _udpServer.TextEncoding.GetBytes("I am server");
+                _udpServer.SendGroupMessage(messageData, 9002);
+            }
+        }
+
+        public void ServerSend()
+        {
+            if (_udpServer.IsRunning)
+            {
+                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9002);
+                _udpServer.SendText(ipEndPoint, "I am server");
+            }
+        }
+
+        public void StartServer()
+        {
+            if (_useMulticast)
+            {
+                //use multicast
+                _udpServer.Start("224.1.1.1", 9001);
+            }
+            else
+            {
+                _udpServer.Start(9001);
+            }
+        }
+
+        public void StopServer()
+        {
+            _udpServer.Stop();
+        }
+
+    }
+```
+<br>
+
+Client:
+``` CSharp
+    public class UdpClientViewModel
+    {
+        public UdpClientViewModel()
+        {
+            _udpClient = new UdpServer();
+            _udpClient.MessageReceived += _udpClient_MessageReceived;
+        }
+
+        private bool _useMulticast = true;
+        private UdpServer _udpClient;
+
+        private void _udpClient_MessageReceived(object sender, UdpMessageReceivedEventArgs args)
+        {
+            string text = _udpClient.TextEncoding.GetString(args.Message.MessageData);
+            //ClientRecvText += text + "\r\n";
+        }
+
+        public void SendGroupMessage()
+        {
+            if (_useMulticast && _udpClient.IsRunning)
+            {
+                byte[] messageData = _udpClient.TextEncoding.GetBytes("I am client");
+                _udpClient.SendGroupMessage(messageData, 9001);
+            }
+        }
+
+        public void ClientSend()
+        {
+            if (_udpClient.IsRunning)
+            {
+                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9001);
+                _udpClient.SendText(ipEndPoint, "I am client");
+            }
+        }
+
+        public void ConnectToServer()
+        {
+            if (_useMulticast)
+            {
+                //use multicast
+                _udpClient.Start("224.1.1.1", 9002);
+            }
+            else
+            {
+                _udpClient.Start(9002);
+            }
+        }
+
+        public void Disconnect()
+        {
+            _udpClient.Stop();
+        }
+    }
+}
+
+```
+<br>
+
+## Process Communication
+### 1.Pipe
+
+Server:
+``` CSharp
+public class PipeServerViewModel
+    {
+        public PipeServerViewModel()
+        {
+            _pipeServer = new PipeServer();
+            _pipeServer.ClientStatusChanged += _pipeServer_ClientStatusChanged;
+            _pipeServer.MessageReceived += _pipeServer_MessageReceived; ;
+        }
+
+        private PipeServer _pipeServer;
+        private void _pipeServer_MessageReceived(object sender, DataMessageReceivedEventArgs args)
+        {
+            string text = _pipeServer.TextEncoding.GetString(args.Data);
+            //ServerRecvText += text + "\r\n";
+        }
+
+        private void _pipeServer_ClientStatusChanged(object sender, PipeClientStatusChangedEventArgs args)
+        {
+
+        }
+
+        public void ServerSend()
+        {
+            if (_pipeServer.Status == ClientStatus.Connected)
+            {
+                byte[] messageData = _pipeServer.TextEncoding.GetBytes("I am server");
+                _pipeServer.SendMessage(messageData);
+            }
+        }
+
+        public void StartServer()
+        {
+             _pipeServer.Start("PipeNameXXX");
+        }
+
+        public void StopServer()
+        {
+            _pipeServer.Stop();
+        }
+    }
+```
+
+Client:
+``` CSharp
+public class PipeClientViewModel
+    {
+        public PipeClientViewModel()
+        {
+            _pipeClient = new PipeClient();
+            _pipeClient.ClientStatusChanged += _pipeClient_ClientStatusChanged;
+            _pipeClient.MessageReceived += _pipeClient_MessageReceived;
+        }
+
+        private PipeClient _pipeClient;
+
+        private void _pipeClient_MessageReceived(object sender, DataMessageReceivedEventArgs args)
+        {
+            string text = _pipeClient.TextEncoding.GetString(args.Data);
+            //ClientRecvText += text + "\r\n";
+        }
+
+        private void _pipeClient_ClientStatusChanged(object sender, PipeClientStatusChangedEventArgs args)
+        {
+            if (args.Status == ClientStatus.Closed)
+            {
+
+            }
+        }
+
+        public void ClientSend()
+        {
+            if (_pipeClient.Status == ClientStatus.Connected)
+            {
+                _pipeClient.SendText(ClientSendText.Trim());
+            }
+        }
+
+        public void ConnectToServer()
+        {
+            _pipeClient.Connect("PipeNameXXX");
+        }
+
+        public void Disconnect()
+        {
+            _pipeClient.Close();
+        }
+    }
+```
+<br>
+
+### 2.Share Memory Simplex
+ShareMemoryReader and ShareMemoryWriter are used in share memory simplex communication. 
+In this mode of communication, data can only be transmitted from one end to the other, not back.
+
+Server:
+``` CSharp
+    public class ShareMemoryServerViewModel
+    {
+        public ShareMemoryServerViewModel()
+        {
+            _shareMemServer = new ShareMemoryReader("MemTest", 1024 * 1024);
+            _shareMemServer.MessageReceived += _shareMemServer_MessageReceived; ;
+        }
+
+        private ShareMemoryReader _shareMemServer;
+
+        private void _shareMemServer_MessageReceived(object sender, DataMessageReceivedEventArgs args)
+        {
+            string text = _shareMemServer.TextEncoding.GetString(args.Data);
+            ServerRecvText += text + "\r\n";
+        }
+
+        public void StartServer()
+        {
+            _shareMemServer.Open();
+        }
+
+        public void StopServer()
+        {
+            _shareMemServer.Close();
+        }
+    }
+```
+
+Client:
+``` CSharp
+    public class ShareMemoryClientViewModel
+    {
+        public ShareMemoryClientViewModel()
+        {
+            _shareMemClient = new ShareMemoryWriter("MemTest", 1024 * 1024);
+        }
+
+        private ShareMemoryWriter _shareMemClient;
+
+        public void ClientSend()
+        {
+            if (_shareMemClient.IsOpen)
+            {
+                _shareMemClient.SendText("I am client");
+            }
+        }
+
+        public void ConnectToServer()
+        {
+            _shareMemClient.Open();
+        }
+
+        public void Disconnect()
+        {
+            _shareMemClient.Close();
+        }
+    }
+```
+
+### 3.Share Memory Duplex
+The ShareMemoryDuplex class is used in share memory duplex communication. 
+In this communication mode, data can be transmitted bidirectionally.Comparing with simplex communication, 
+duplex communication will cost more system resources. Before using, 
+please choose the appropriate communication mode according to the requirements.
+<br>
+
+Server:
+``` CSharp
+    public class ShareMemoryDuplexServerViewModel
+    {
+        public ShareMemoryDuplexServerViewModel()
+        {
+            _shareMemServer = new ShareMemoryDuplex(true, "MemDuplexTest", 1024 * 1024);
+            _shareMemServer.MessageReceived += _shareMemServer_MessageReceived;
+        }
+
+        private ShareMemoryDuplex _shareMemServer;
+
+        private void _shareMemServer_MessageReceived(object sender, DataMessageReceivedEventArgs args)
+        {
+            string text = _shareMemServer.TextEncoding.GetString(args.Data);
+        }
+
+        public void ServerSend()
+        {
+            if (_shareMemServer.IsOpen)
+            {
+                _shareMemServer.SendText("I am server");
+            }
+        }
+
+        public  void StartServer()
+        {
+            _shareMemServer.Open();
+            CanStartServer = false;
+        }
+
+        public void StopServer()
+        {
+            _shareMemServer.Close();
+        }
+    }
+```
+
+Client:
+``` CSharp
+	public class ShareMemoryDuplexClientViewModel
+    {
+        public ShareMemoryDuplexClientViewModel()
+        {
+            _shareMemClient = new ShareMemoryDuplex(false, "MemDuplexTest", 1024 * 1024);
+            _shareMemClient.MessageReceived += _shareMemClient_MessageReceived;
+        }
+
+        private ShareMemoryDuplex _shareMemClient;
+
+        private void _shareMemClient_MessageReceived(object sender, DataMessageReceivedEventArgs args)
+        {
+            string text = _shareMemClient.TextEncoding.GetString(args.Data);
+        }
+
+        public void ClientSend()
+        {
+            if (_shareMemClient.IsOpen)
+            {
+                _shareMemClient.SendText(ClientSendText.Trim());
+            }
+        }
+
+        public void ConnectToServer()
+        {
+             _shareMemClient.Open();
+        }
+
+        public void Disconnect()
+        {
+            _shareMemClient.Close();
+        }
+    }
+```

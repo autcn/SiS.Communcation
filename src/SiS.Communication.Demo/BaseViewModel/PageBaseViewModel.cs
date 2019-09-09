@@ -1,10 +1,4 @@
-﻿using SiS.Communication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SiS.Communication.Demo
+﻿namespace SiS.Communication.Demo
 {
     public abstract class PageBaseViewModel : NotifyBase
     {
