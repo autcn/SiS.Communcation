@@ -59,7 +59,6 @@
     <Compile Include="..\SiS.Communication\Spliter\SimplePacketSpliter.cs" Link="Spliter\SimplePacketSpliter.cs" />
     <Compile Include="..\SiS.Communication\Tcp\ClientContext.cs" Link="Tcp\ClientContext.cs" />
     <Compile Include="..\SiS.Communication\Tcp\ClientContextPool.cs" Link="Tcp\ClientContextPool.cs" />
-    <Compile Include="..\SiS.Communication\Tcp\ClientsHandler.cs" Link="Tcp\ClientsHandler.cs" />
     <Compile Include="..\SiS.Communication\Tcp\GroupTransmitMessage.cs" Link="Tcp\GroupTransmitMessage.cs" />
     <Compile Include="..\SiS.Communication\Tcp\JoinGroupMessage.cs" Link="Tcp\JoinGroupMessage.cs" />
     <Compile Include="..\SiS.Communication\Tcp\TcpBase.cs" Link="Tcp\TcpBase.cs" />

@@ -70,7 +70,6 @@
     <Compile Include="Process\ShareMemoryReader.cs" />
     <Compile Include="Process\ShareMemoryBase.cs" />
     <Compile Include="Tcp\ClientContext.cs" />
-    <Compile Include="Tcp\ClientsHandler.cs" />
     <Compile Include="Tcp\JoinGroupMessage.cs" />
     <Compile Include="Tcp\ClientContextPool.cs" />
     <Compile Include="Tcp\TcpBase.cs" />

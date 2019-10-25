@@ -5,6 +5,7 @@
     /// </summary>
     public class TcpServerConfig : TcpConfig
     {
+        public static TcpServerConfig Default { get; } = new TcpServerConfig();
         /// <summary>
         /// Initializes a new instance of the TcpServerConfig. 
         /// The default ReceiveDataMaxSpeed is 10M/S, in bytes.
@@ -26,13 +27,13 @@
         /// Gets or sets the init count of client handlers.
         /// </summary>
         /// <returns>The init count of client handlers. The default is 4.</returns>
-        public int InitHandlerCount { get; set; } = 4;
+        //public int InitHandlerCount { get; set; } = 4;
 
         /// <summary>
         /// Gets or sets the limited clients count in each handler.
         /// </summary>
         /// <returns>The limited clients count. The default is 10.</returns>
-        public int MaxHandlerClientCount { get; set; } = 10;
+        //public int MaxHandlerClientCount { get; set; } = 10;
 
         /// <summary>
         /// Gets or sets the max count of clients. The default is 100. 

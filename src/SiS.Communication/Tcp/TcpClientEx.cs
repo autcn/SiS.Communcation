@@ -47,7 +47,8 @@ namespace SiS.Communication.Tcp
             _clientID = BitConverter.ToInt64(array, 0);
             _packetSpliter = packetSpliter;
             _autoReconnect = autoReconnect;
-            _tcpClientConfig = new TcpClientConfig();
+            _tcpConfig = new TcpClientConfig();
+            //_tcpConfig = _tcpClientConfig;
             _reconnectWaitEvent = new ManualResetEvent(false);
             if (SynchronizationContext.Current == null)
             {
@@ -58,29 +59,20 @@ namespace SiS.Communication.Tcp
 
         #endregion
 
-        #region Events
-        /// <summary>
-        /// Represents the method that will handle the client status changed event of a SiS.Communication.Tcp.TcpClientEx object.
-        /// </summary>
-        public event ClientStatusChangedEventHandler ClientStatusChanged;
-
-        /// <summary>
-        /// Represents the method that will handle the tcp message received event of a SiS.Communication.Tcp.TcpClientEx object.
-        /// </summary>
-        public event TcpRawMessageReceivedEventHandler MessageReceived;
-
-        #endregion
-
         #region Private Members
         private Socket _clientSocket;
-        private TcpClientConfig _tcpClientConfig;
+       // private TcpClientConfig _tcpClientConfig;
         private ManualResetEvent _reconnectWaitEvent;
         private SynchronizationContext _syncContext;
-        private ClientsHandler _clientsHandler;
         private string[] _groupArray;
         #endregion
 
         #region Properties
+
+        private TcpClientConfig ClientConfig
+        {
+            get { return (TcpClientConfig)_tcpConfig; }
+        }
 
         /// <summary>
         /// Gets or sets an user defined object.
@@ -154,13 +146,8 @@ namespace SiS.Communication.Tcp
         }
         #endregion
 
-        #region Protected Functions
-
-        protected virtual bool ReceivedMessageFilter(TcpRawMessageReceivedEventArgs tcpRawMessageArgs)
-        {
-            return false;
-        }
-
+        #region Events
+        public new event ClientStatusChangedEventHandler ClientStatusChanged;
         #endregion
 
         #region Private Functions
@@ -190,9 +177,9 @@ namespace SiS.Communication.Tcp
         private void InitClientSocket()
         {
             _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            if (_tcpClientConfig.EnableKeepAlive)
+            if (ClientConfig.EnableKeepAlive)
             {
-                TcpUtility.SetKeepAlive(_clientSocket, _tcpClientConfig.KeepAliveTime, _tcpClientConfig.KeepAliveInterval);
+                TcpUtility.SetKeepAlive(_clientSocket, ClientConfig.KeepAliveTime, ClientConfig.KeepAliveInterval);
             }
         }
 
@@ -220,14 +207,15 @@ namespace SiS.Communication.Tcp
             if (isConnected)
             {
                 // InitWorkers();
-                if (_clientsHandler == null)
-                {
-                    _clientsHandler = new ClientsHandler(this, _tcpClientConfig);
-                    _clientsHandler.ClientStatusChanged += _clientsHandler_ClientStatusChanged;
-                    _clientsHandler.MessageReceived += _clientsHandler_TaskReceived;
-                    _clientsHandler.Start();
-                }
-                _clientsHandler.AddNewClient(_clientSocket);
+                //if (_clientsHandler == null)
+                //{
+                //    _clientsHandler = new ClientsHandler(this, _tcpClientConfig);
+                //    _clientsHandler.ClientStatusChanged += _clientsHandler_ClientStatusChanged;
+                //    _clientsHandler.MessageReceived += _clientsHandler_TaskReceived;
+                //    _clientsHandler.Start();
+                //}
+                //_clientsHandler.
+                AddNewClient(_clientSocket);
             }
             else
             {
@@ -258,15 +246,6 @@ namespace SiS.Communication.Tcp
             }
         }
 
-        private void _clientsHandler_TaskReceived(object sender, TcpRawMessageReceivedEventArgs args)
-        {
-            if (ReceivedMessageFilter(args))
-            {
-                return;
-            }
-            MessageReceived?.Invoke(this, args);
-        }
-
         private void _clientsHandler_ClientStatusChanged(object sender, ClientStatusChangedEventArgs args)
         {
             _syncContext.Post((state) =>
@@ -281,6 +260,23 @@ namespace SiS.Communication.Tcp
                 }
 
             }, null);
+        }
+
+        protected override void OnClientStatusChanged(ClientStatusChangedEventArgs args)
+        {
+            _syncContext.Post((state) =>
+            {
+                ClientStatus status = (ClientStatus)state;
+                if (status == ClientStatus.Connected)
+                {
+                    SetStatusAndNotify(status);
+                }
+                else if (status == ClientStatus.Closed)
+                {
+                    AfterConnect(false);
+                }
+
+            }, args.Status);
         }
 
         private void ConnectAsyncInner(Action<bool> callback)
@@ -314,11 +310,11 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("can not set tcp client parameter during running");
             }
-            _tcpClientConfig = clientConfig;
+            _tcpConfig = clientConfig;
         }
 
         /// <summary>
-        /// Connect to tcp server in asynchronous mode.
+        /// Connect to tcp server in asynchronous mode.The default timeout is 5 seconds.
         /// </summary>
         /// <param name="ipAddress">The ip address of server in string type.</param>
         /// <param name="port">The server listening port.</param>
@@ -326,11 +322,24 @@ namespace SiS.Communication.Tcp
         /// true if connected successfully; otherwise, false.</param>
         public void ConnectAsync(string ipAddress, UInt16 port, Action<bool> callback)
         {
+            ConnectAsync(ipAddress, port, 5000, callback);
+        }
+
+        /// <summary>
+        /// Connect to tcp server in asynchronous mode.
+        /// </summary>
+        /// <param name="ipAddress">The ip address of server in string type.</param>
+        /// <param name="port">The server listening port.</param>
+        /// <param name="timeout">The connection timeout in Millseconds.</param>
+        /// <param name="callback">The callback after the connection completed. 
+        /// true if connected successfully; otherwise, false.</param>
+        public void ConnectAsync(string ipAddress, UInt16 port, int timeout, Action<bool> callback)
+        {
             if (_isRunning)
             {
                 throw new AlreadyRunningException("The client is running");
             }
-            BeforeConnect(ipAddress, port, 2000);
+            BeforeConnect(ipAddress, port, timeout);
             ConnectAsyncInner(callback);
         }
 
@@ -371,12 +380,8 @@ namespace SiS.Communication.Tcp
             _reconnectWaitEvent.Set();
             _clientSocket.Close();
             _clientSocket.Dispose();
+            CloseAllClients();
             SetStatusAndNotify(ClientStatus.Closed);
-            if (_clientsHandler != null)
-            {
-                _clientsHandler.Stop();
-                _clientsHandler = null;
-            }
         }
 
         #region Send Message
@@ -405,7 +410,18 @@ namespace SiS.Communication.Tcp
                 throw new Exception("the client is not connected");
             }
             byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
-            return _clientSocket.Send(packetForSend);
+            int sendTotal = 0;
+            while (sendTotal < packetForSend.Length)
+            {
+                int single = _clientSocket.Send(packetForSend, sendTotal, packetForSend.Length - sendTotal, SocketFlags.None);
+                sendTotal += single;
+                //if(single != packetForSend.Length)
+                //{
+                //    int a = 0;
+                //}
+            }
+            //return _clientSocket.Send(packetForSend);
+            return messageData.Length;
         }
 
         /// <summary>

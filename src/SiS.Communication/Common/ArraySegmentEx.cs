@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace SiS.Communication
 {
@@ -17,7 +18,15 @@ namespace SiS.Communication
             T[] newArray = new T[arraySegment.Count];
             Array.Copy(arraySegment.Array, arraySegment.Offset, newArray, 0, arraySegment.Count);
             return newArray;
-
+        }
+        /// <summary>
+        /// Convert byte array segment to string with specific encoding.
+        /// </summary>
+        /// <param name="encoding">The character encoding used in conversion.</param>
+        /// <returns>The converted string from byte array segment.</returns>
+        public static string ToString(this ArraySegment<byte> arraySegment, Encoding encoding)
+        {
+            return encoding.GetString(arraySegment.Array, 0, arraySegment.Count);
         }
 
         /// <summary>

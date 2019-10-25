@@ -89,7 +89,7 @@ namespace SiS.Communication.Tcp
         /// <summary>
         /// The task scheduler associated with the client. It is usually used to process tasks sequentially.
         /// </summary>
-        public TaskScheduler Scheduler { get; set; }
+        //public TaskScheduler Scheduler { get; set; }
     }
     /// <summary>
     /// Represents the method that will handle the tcp MessageReceived event.

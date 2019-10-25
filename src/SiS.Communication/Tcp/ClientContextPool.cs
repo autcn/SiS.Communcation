@@ -7,12 +7,12 @@ namespace SiS.Communication.Tcp
     /// <summary>
     /// Represents a pool to manage ClientContext
     /// </summary>
-    internal class ClientContextPool
+    public class ClientContextPool
     {
         #region Constructor
         public ClientContextPool(int maxClientsCount, int sockAsyncBufferSize)
         {
-            _maxClientsCount = Math.Min(maxClientsCount, 10000);
+            _maxClientsCount = maxClientsCount; //Math.Min(maxClientsCount, 10000);
             _sockAsyncBufferSize = sockAsyncBufferSize;
 
             _bufferForAll = new byte[_sockAsyncBufferSize * _maxClientsCount];

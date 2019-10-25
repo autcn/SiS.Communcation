@@ -22,9 +22,14 @@ namespace SiS.Communication.Tcp
         }
 
         /// <summary>
+        /// Gets or sets the user data.
+        /// </summary>
+        public object Tag { get; set; }
+
+        /// <summary>
         /// Gets or sets the id of the hander that contains the client.
         /// </summary>
-        public Guid HandlerID { get; set; }
+        //public Guid HandlerID { get; set; }
 
         /// <summary>
         /// Gets or sets the basic Socket.
@@ -82,7 +87,7 @@ namespace SiS.Communication.Tcp
         /// </summary>
         public void Reset()
         {
-            HandlerID = Guid.Empty;
+            Tag = null;
             ClientSocket = null;
             ClientID = default(long);
             IPEndPoint = null;
@@ -92,7 +97,6 @@ namespace SiS.Communication.Tcp
             RecvSpeedController?.Reset();
             SendController?.Reset();
             RecvRawMessage.ClientID = default(long);
-            RecvRawMessage.HandlerID = Guid.Empty;
             RecvRawMessage.MessageRawData = default(ArraySegment<byte>);
             if (SockAsyncArgs != null)
             {
