@@ -261,7 +261,26 @@ namespace SiS.Communication.Tcp
 
         protected void CloseClient(long clientID)
         {
-            CloseClients(new List<long>() { clientID });
+            if (_clients.ContainsKey(clientID))
+            {
+                ClientContext clientContext = _clients[clientID];
+                IPEndPoint ipEndPt = clientContext.IPEndPoint;
+                clientContext.Status = ClientStatus.Closed;
+                clientContext.ClientSocket.Close();
+                clientContext.ClientSocket.Dispose();
+                clientContext.SockAsyncArgs.Completed -= SockAsyncArgs_Completed;
+                
+                if (_isRunning)
+                {
+                    NotifyClientStatusChangedAsync(clientID, ipEndPt, ClientStatus.Closed);
+                }
+                _clients.TryRemove(clientID, out ClientContext n);
+                if (_clientContextPool != null)
+                {
+                    clientContext.Reset();
+                    _clientContextPool.Push(clientContext);
+                }
+            }
         }
 
         protected void CloseClients(IEnumerable<long> clientIDCollection)
@@ -273,25 +292,7 @@ namespace SiS.Communication.Tcp
 
             foreach (long clientID in clientIDCollection)
             {
-                if (_clients.ContainsKey(clientID))
-                {
-                    ClientContext clientContext = _clients[clientID];
-                    IPEndPoint ipEndPt = clientContext.IPEndPoint;
-                    clientContext.Status = ClientStatus.Closed;
-                    clientContext.ClientSocket.Close();
-                    clientContext.ClientSocket.Dispose();
-                    clientContext.SockAsyncArgs.Completed -= SockAsyncArgs_Completed;
-                    _clients.TryRemove(clientID, out ClientContext n);
-                    if (_isRunning)
-                    {
-                        NotifyClientStatusChangedAsync(clientID, ipEndPt, ClientStatus.Closed);
-                    }
-                    if (_clientContextPool != null)
-                    {
-                        clientContext.Reset();
-                        _clientContextPool.Push(clientContext);
-                    }
-                }
+                CloseClient(clientID);
             }
         }
 

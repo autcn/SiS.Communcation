@@ -70,7 +70,7 @@ namespace SiS.Communication.Tcp
             if (args.Status == ClientStatus.Closed)
             {
                 ClientContext toRemoveClientContext;
-                if (_clients.TryRemove(args.ClientID, out toRemoveClientContext))
+                if (_clients.TryGetValue(args.ClientID, out toRemoveClientContext))
                 {
                     RemoveClientFromGroup(toRemoveClientContext);
                 }
