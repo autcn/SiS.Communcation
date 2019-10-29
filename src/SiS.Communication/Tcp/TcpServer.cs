@@ -36,7 +36,7 @@ namespace SiS.Communication.Tcp
 
         #region Private members
 
-       // private TcpServerConfig _serverConfig;//server parameter
+        // private TcpServerConfig _serverConfig;//server parameter
         private ushort _listenPort; //listen port
         private Socket _serverSocket; //server listen socket
         private ConcurrentDictionary<string, HashSet<long>> _groups;
@@ -63,21 +63,29 @@ namespace SiS.Communication.Tcp
 
         #endregion
 
+        #region Events
+        /// <summary>
+        /// Represents the method that will handle the client status changed event of a SiS.Communication.Tcp.TcpServer object.
+        /// </summary>
+        public event ClientStatusChangedEventHandler ClientStatusChanged;
+        /// <summary>
+        /// Represents the method that will handle the message received event of a SiS.Communication.Tcp.TcpServer object.
+        /// </summary>
+        public event TcpRawMessageReceivedEventHandler MessageReceived;
+        #endregion
+
         #region Private functions
 
-        protected override void OnClientStatusChanged(ClientStatusChangedEventArgs args)
+        protected override void OnClientStatusChanged(bool isInThread, ClientStatusChangedEventArgs args, HashSet<string> clientGroups)
         {
             if (args.Status == ClientStatus.Closed)
             {
-                ClientContext toRemoveClientContext;
-                if (_clients.TryGetValue(args.ClientID, out toRemoveClientContext))
-                {
-                    RemoveClientFromGroup(toRemoveClientContext);
-                }
+                RemoveClientFromGroup(args.ClientID, clientGroups);
             }
+            ClientStatusChanged?.Invoke(this, args);
         }
 
-        protected override bool OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
+        protected override void OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
         {
             ArraySegment<byte> rawSegment = args.Message.MessageRawData;
             if (rawSegment.Count >= 4)
@@ -87,13 +95,13 @@ namespace SiS.Communication.Tcp
                 {
                     if (!EnableGroup)
                     {
-                        return true;
+                        return;
                     }
 
                     JoinGroupMessage joinGroupMsg = null;
                     if (!JoinGroupMessage.TryParse(rawSegment, out joinGroupMsg))
                     {
-                        return true;
+                        return;
                     }
 
                     if (_clients.TryGetValue(args.Message.ClientID, out ClientContext clientContext))
@@ -101,7 +109,7 @@ namespace SiS.Communication.Tcp
                         clientContext.Groups = joinGroupMsg.GroupSet;
                         AddClientToGroup(clientContext);
                     }
-                    return true;
+                    return;
                 }
                 else if (specialMark == TcpUtility.GROUP_TRANSMIT_MSG_MARK
                     || specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK)
@@ -109,12 +117,12 @@ namespace SiS.Communication.Tcp
                     bool loopBack = specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK;
                     if (!EnableGroup)
                     {
-                        return true;
+                        return;
                     }
                     GroupTransmitMessage transPacket = null;
                     if (!GroupTransmitMessage.TryParse(rawSegment, out transPacket))
                     {
-                        return true;
+                        return;
                     }
                     try
                     {
@@ -123,13 +131,13 @@ namespace SiS.Communication.Tcp
                             ClientContext sourceClient = GetClient(args.Message.ClientID);
                             if (sourceClient == null || sourceClient.Groups == null || sourceClient.Groups.Count == 0)
                             {
-                                return true;
+                                return;
                             }
                             foreach (string groupName in transPacket.GroupNameCollection)
                             {
                                 if (!sourceClient.Groups.Contains(groupName))
                                 {
-                                    return true;
+                                    return;
                                 }
                             }
                         }
@@ -140,28 +148,30 @@ namespace SiS.Communication.Tcp
                     {
                         _logger?.Warn("Transmit group message exception.", ex.Message);
                     }
-                    return true;
+                    return;
                 }
             }
-
-
-
-            return false;
-        }
-
-        private void RemoveClientFromGroup(ClientContext clientContext)
-        {
-            if (clientContext.Groups == null)
+            if (ReceivedMessageFilter(args))
             {
                 return;
             }
-            foreach (string groupName in clientContext.Groups)
+            MessageReceived?.Invoke(this, args);
+            return;
+        }
+
+        private void RemoveClientFromGroup(long clientID, HashSet<string> groups)
+        {
+            if (groups == null)
+            {
+                return;
+            }
+            foreach (string groupName in groups)
             {
                 if (_groups.TryGetValue(groupName, out HashSet<long> clients))
                 {
-                    if (clients.Contains(clientContext.ClientID))
+                    if (clients.Contains(clientID))
                     {
-                        clients.Remove(clientContext.ClientID);
+                        clients.Remove(clientID);
                     }
                 }
             }
@@ -285,7 +295,7 @@ namespace SiS.Communication.Tcp
             {
                 throw new AlreadyRunningException("the server is already running");
             }
-            _clientContextPool = new ClientContextPool(serverConfig.MaxClientCount, serverConfig.SocketAsyncBufferSize);
+            // _clientContextPool = new ClientContextPool(serverConfig.MaxClientCount, serverConfig.SocketAsyncBufferSize);
             Contract.Requires(listenPort > 0 && listenPort < 65535);
             Contract.Requires(serverConfig != null);
             _tcpConfig = serverConfig;
@@ -324,8 +334,18 @@ namespace SiS.Communication.Tcp
             _serverSocket.Close();
             _serverSocket.Dispose();
             _serverSocket = null;
-            CloseAllClients();
-            _clientContextPool.Clear();
+            foreach (ClientContext clientContext in _clients.Values)
+            {
+                IPEndPoint ipEndPt = clientContext.IPEndPoint;
+                clientContext.Status = ClientStatus.Closed;
+                clientContext.ClientSocket.Close();
+                clientContext.ClientSocket.Dispose();
+            }
+            _clients.Clear();
+            if (_clientContextPool != null)
+            {
+                _clientContextPool.Clear();
+            }
             _groups.Clear();
         }
 
@@ -370,9 +390,9 @@ namespace SiS.Communication.Tcp
         /// Close client connection by client id.
         /// </summary>
         /// <param name="clientID">The client id to disconnect from the server.</param>
-        public new void CloseClient(long clientID)
+        public void CloseClient(long clientID)
         {
-            base.CloseClient(clientID);
+            base.CloseClient(false, clientID);
         }
 
         /// <summary>

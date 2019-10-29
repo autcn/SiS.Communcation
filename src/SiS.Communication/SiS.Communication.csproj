@@ -43,6 +43,7 @@
     <Compile Include="Business\GeneralMessage.cs" />
     <Compile Include="Business\ModelMessageBase.cs" />
     <Compile Include="Business\ModelMessageConvert.cs" />
+    <Compile Include="Business\TcpProxyChannel.cs" />
     <Compile Include="Business\RelayRequestMessageSender.cs" />
     <Compile Include="Business\ResponseMessageBase.cs" />
     <Compile Include="Business\RequestMessageBase.cs" />

@@ -198,6 +198,7 @@ namespace SiS.Communication.Demo
                 _tcpClient.ConnectAsync("127.0.0.1", _serverPort, (isConnected) =>
                 {
                     CanConnect = !isConnected;
+                    //_tcpClient.SendText("1234567890");
                 });
             }
         }

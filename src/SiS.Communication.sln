@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiS.Communication.Demo", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpFile.Demo", "TcpFile.Demo\TcpFile.Demo.csproj", "{A6E4074A-DE54-4818-A2F7-5F48C1DBA993}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpProxy", "TcpProxy\TcpProxy.csproj", "{6E6A828E-A3D1-4B08-BD05-FC1EF78B9C0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{A6E4074A-DE54-4818-A2F7-5F48C1DBA993}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6E4074A-DE54-4818-A2F7-5F48C1DBA993}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6E4074A-DE54-4818-A2F7-5F48C1DBA993}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E6A828E-A3D1-4B08-BD05-FC1EF78B9C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E6A828E-A3D1-4B08-BD05-FC1EF78B9C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E6A828E-A3D1-4B08-BD05-FC1EF78B9C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E6A828E-A3D1-4B08-BD05-FC1EF78B9C0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

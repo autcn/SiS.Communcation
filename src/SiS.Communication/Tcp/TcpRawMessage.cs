@@ -8,11 +8,6 @@ namespace SiS.Communication.Tcp
     public class TcpRawMessage
     {
         /// <summary>
-        /// The id of the handler where the message from.
-        /// </summary>
-       // public Guid HandlerID { get; set; }
-
-        /// <summary>
         /// The id of the client where the message from.
         /// </summary>
         public long ClientID { get; set; }
@@ -30,7 +25,6 @@ namespace SiS.Communication.Tcp
         public TcpMessage ToTcpMessage()
         {
             TcpMessage tcpMsg = new TcpMessage();
-            //tcpMsg.HandlerID = this.HandlerID;
             tcpMsg.ClientID = this.ClientID;
             tcpMsg.MessageData = this.MessageRawData.ToArray();
             return tcpMsg;
@@ -42,11 +36,6 @@ namespace SiS.Communication.Tcp
     /// </summary>
     public class TcpMessage
     {
-        /// <summary>
-        /// The id of the handler where the message from.
-        /// </summary>
-       // public Guid HandlerID { get; set; }
-
         /// <summary>
         /// The id of the client where the message from.
         /// </summary>

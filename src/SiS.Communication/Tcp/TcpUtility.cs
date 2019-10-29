@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace SiS.Communication.Tcp
 {
@@ -85,11 +84,6 @@ namespace SiS.Communication.Tcp
         /// </summary>
         /// <returns>The message received from the network.</returns>
         public TcpRawMessage Message { get; set; }
-
-        /// <summary>
-        /// The task scheduler associated with the client. It is usually used to process tasks sequentially.
-        /// </summary>
-        //public TaskScheduler Scheduler { get; set; }
     }
     /// <summary>
     /// Represents the method that will handle the tcp MessageReceived event.

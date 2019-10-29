@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Linq;
 
 namespace SiS.Communication.Tcp
 {
@@ -61,7 +62,7 @@ namespace SiS.Communication.Tcp
 
         #region Private Members
         private Socket _clientSocket;
-       // private TcpClientConfig _tcpClientConfig;
+        // private TcpClientConfig _tcpClientConfig;
         private ManualResetEvent _reconnectWaitEvent;
         private SynchronizationContext _syncContext;
         private string[] _groupArray;
@@ -98,10 +99,11 @@ namespace SiS.Communication.Tcp
             get { return _clientStatus; }
         }
 
+        
+        private IPEndPoint _serverEndPoint;
         /// <summary>
         /// Gets or sets server ip end point.
         /// </summary>
-        private IPEndPoint _serverEndPoint;
         public IPEndPoint ServerIPEndPoint
         {
             get { return _serverEndPoint; }
@@ -147,10 +149,26 @@ namespace SiS.Communication.Tcp
         #endregion
 
         #region Events
-        public new event ClientStatusChangedEventHandler ClientStatusChanged;
+        /// <summary>
+        /// Represents the method that will handle the client status changed event of a SiS.Communication.Tcp.TcpClientEx object.
+        /// </summary>
+        public event ClientStatusChangedEventHandler ClientStatusChanged;
+        /// <summary>
+        /// Represents the method that will handle the message received event of a SiS.Communication.Tcp.TcpClientEx object.
+        /// </summary>
+        public event TcpRawMessageReceivedEventHandler MessageReceived;
         #endregion
 
         #region Private Functions
+
+        protected override void OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
+        {
+            if (ReceivedMessageFilter(args))
+            {
+                return;
+            }
+            MessageReceived?.Invoke(this, args);
+        }
 
         private void BeforeConnect(string strIp, UInt16 nPort, int timeOut)
         {
@@ -206,77 +224,83 @@ namespace SiS.Communication.Tcp
             }
             if (isConnected)
             {
-                // InitWorkers();
-                //if (_clientsHandler == null)
-                //{
-                //    _clientsHandler = new ClientsHandler(this, _tcpClientConfig);
-                //    _clientsHandler.ClientStatusChanged += _clientsHandler_ClientStatusChanged;
-                //    _clientsHandler.MessageReceived += _clientsHandler_TaskReceived;
-                //    _clientsHandler.Start();
-                //}
-                //_clientsHandler.
                 AddNewClient(_clientSocket);
             }
             else
             {
                 _clientSocket.Close();
                 _clientSocket.Dispose();
-                if (_autoReconnect)
+                if (!_autoReconnect)
                 {
-                    SetStatusAndNotify(ClientStatus.Connecting);
+                    _isRunning = false;
+                    SetStatusAndNotify(ClientStatus.Closed);
+                }
+                else
+                {
+                    //if auto reconnect is used, we should do reconnect
                     ThreadEx.Start(() =>
                     {
                         //reconnect to server 2 seconds later
                         _reconnectWaitEvent.WaitOne(2000);
+                        if (_isRunning)
+                        {
+                            InitClientSocket();
+                            ConnectAsyncInner(null);
+                        }
+                    });
+                }
+            }
+        }
+
+        protected override void OnClientStatusChanged(bool isInThread, ClientStatusChangedEventArgs args, HashSet<string> groups)
+        {
+            ClientStatus status = args.Status;
+            if (status == ClientStatus.Connected)
+            {
+                SetStatusAndNotify(status);
+            }
+            else if (status == ClientStatus.Closed)
+            {
+                if (!_autoReconnect)
+                {
+                    _isRunning = false;
+                    if (isInThread)
+                    {
                         _syncContext.Post((state) =>
                         {
+                            SetStatusAndNotify(ClientStatus.Closed);
+                        }, null);
+                    }
+                    else
+                    {
+                        SetStatusAndNotify(ClientStatus.Closed);
+                    }
+                }
+                else
+                {
+                    if (!_isRunning)
+                    {
+                        return;
+                    }
+
+                    _syncContext.Post((state) =>
+                    {
+                        // AfterConnect(false);
+                        SetStatusAndNotify(ClientStatus.Connecting);
+                        ThreadEx.Start(() =>
+                        {
+                            //reconnect to server 2 seconds later
+                            _reconnectWaitEvent.WaitOne(2000);
+
                             if (_isRunning)
                             {
                                 InitClientSocket();
                                 ConnectAsyncInner(null);
                             }
-                        }, null);
-                    });
-                }
-                else
-                {
-                    _isRunning = false;
-                    SetStatusAndNotify(ClientStatus.Closed);
+                        });
+                    }, null);
                 }
             }
-        }
-
-        private void _clientsHandler_ClientStatusChanged(object sender, ClientStatusChangedEventArgs args)
-        {
-            _syncContext.Post((state) =>
-            {
-                if (args.Status == ClientStatus.Connected)
-                {
-                    SetStatusAndNotify(args.Status);
-                }
-                else if (args.Status == ClientStatus.Closed)
-                {
-                    AfterConnect(false);
-                }
-
-            }, null);
-        }
-
-        protected override void OnClientStatusChanged(ClientStatusChangedEventArgs args)
-        {
-            _syncContext.Post((state) =>
-            {
-                ClientStatus status = (ClientStatus)state;
-                if (status == ClientStatus.Connected)
-                {
-                    SetStatusAndNotify(status);
-                }
-                else if (status == ClientStatus.Closed)
-                {
-                    AfterConnect(false);
-                }
-
-            }, args.Status);
         }
 
         private void ConnectAsyncInner(Action<bool> callback)
@@ -380,8 +404,16 @@ namespace SiS.Communication.Tcp
             _reconnectWaitEvent.Set();
             _clientSocket.Close();
             _clientSocket.Dispose();
-            CloseAllClients();
-            SetStatusAndNotify(ClientStatus.Closed);
+            long clientID = -1;
+            try
+            {
+                clientID = _clients.Keys.First();
+            }
+            catch { }
+            if (clientID >= 0)
+                CloseClient(false, clientID);
+            else
+                SetStatusAndNotify(ClientStatus.Closed);
         }
 
         #region Send Message

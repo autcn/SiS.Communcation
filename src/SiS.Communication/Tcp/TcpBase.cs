@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace SiS.Communication.Tcp
 {
@@ -23,6 +22,7 @@ namespace SiS.Communication.Tcp
         #endregion
 
         #region Private Members
+
         protected bool _isRunning = false;
         protected IPacketSpliter _packetSpliter;
         protected TcpConfig _tcpConfig;
@@ -30,11 +30,6 @@ namespace SiS.Communication.Tcp
         protected ILog _logger;
         protected ConcurrentDictionary<long, ClientContext> _clients;
 
-        #endregion
-
-        #region Events
-        public event ClientStatusChangedEventHandler ClientStatusChanged;
-        public event TcpRawMessageReceivedEventHandler MessageReceived;
         #endregion
 
         #region Properties
@@ -82,27 +77,24 @@ namespace SiS.Communication.Tcp
                 _packetSpliter = value;
             }
         }
-        #endregion
 
+        #endregion
 
         #region Protected Functions
 
+        protected virtual void OnClientStatusChanged(bool isInThread, ClientStatusChangedEventArgs args, HashSet<string> clientGroups)
+        {
+        }
+
+        protected virtual void OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
+        {
+        }
         protected virtual bool ReceivedMessageFilter(TcpRawMessageReceivedEventArgs tcpRawMessageArgs)
         {
             return false;
         }
 
-        protected virtual void OnClientStatusChanged(ClientStatusChangedEventArgs args)
-        {
-        }
-
-        protected virtual bool OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
-        {
-            return false;
-        }
-
         #endregion
-
 
         #region Private functions
 
@@ -113,11 +105,11 @@ namespace SiS.Communication.Tcp
                 return;
             }
             long clientID = (long)sockAsyncArgs.UserToken;
-            if (!_clients.ContainsKey(clientID))
+
+            if (!_clients.TryGetValue(clientID, out ClientContext clientContext))
             {
                 return;
             }
-            ClientContext clientContext = _clients[clientID];
             Socket sockClient = clientContext.ClientSocket;
             if (sockAsyncArgs.SocketError == SocketError.Success)
             {
@@ -149,13 +141,7 @@ namespace SiS.Communication.Tcp
                                 {
                                     Message = clientContext.RecvRawMessage
                                 };
-                                if (!OnRawMessageReceived(rawMessage))
-                                {
-                                    if (!ReceivedMessageFilter(rawMessage))
-                                    {
-                                        MessageReceived?.Invoke(this, rawMessage);
-                                    }
-                                }
+                                OnRawMessageReceived(rawMessage);
                             }
                         }
                     }
@@ -163,7 +149,8 @@ namespace SiS.Communication.Tcp
                     {
                         //invalid data received , indicates the client has made a illegal connection, we should disconnect it.
                         _logger?.Info("illegal connection detected");
-                        CloseClient((long)sockClient.Handle);
+                        if (_isRunning)
+                            CloseClient(true, (long)sockClient.Handle);
                         return;
                     }
                     catch (Exception ex)
@@ -171,38 +158,28 @@ namespace SiS.Communication.Tcp
                         _logger?.Warn("an error has occurred during get packets", ex.Message);
                     }
 
-                    if (!clientContext.ClientSocket.ReceiveAsync(sockAsyncArgs))
+                    //in case of the socket is closed, the following statements may cause of exception, so we should use try catch
+                    try
                     {
-                        ProcessReceive(sockAsyncArgs);
+                        if (!clientContext.ClientSocket.ReceiveAsync(sockAsyncArgs))
+                        {
+                            ProcessReceive(sockAsyncArgs);
+                        }
                     }
+                    catch { }
                 }
                 else
                 {
                     _logger?.Warn($"sockAsyncArgs got an error: {sockAsyncArgs.SocketError.ToString()}");
-                    CloseClient(clientID);
+                    if (_isRunning)
+                        CloseClient(true, clientID);
                 }
             }
             else
             {
-                CloseClient(clientID);
+                if (_isRunning)
+                    CloseClient(true, clientID);
             }
-        }
-
-        private void NotifyClientStatusChangedAsync(long clientID, IPEndPoint ipEnd, ClientStatus status)
-        {
-            //async event
-            ClientStatusChangedEventArgs eventArgs = new ClientStatusChangedEventArgs()
-            {
-                ClientID = clientID,
-                IPEndPoint = ipEnd,
-                Status = status
-            };
-            //ThreadEx.Start((args) =>
-            //{
-            OnClientStatusChanged(eventArgs);
-            ClientStatusChanged?.Invoke(this, eventArgs);
-            //   ClientStatusChanged?.Invoke(this, (ClientStatusChangedEventArgs)args);
-            // }, eventArgs);
         }
 
         private void SockAsyncArgs_Completed(object sender, SocketAsyncEventArgs e)
@@ -212,10 +189,6 @@ namespace SiS.Communication.Tcp
                 ProcessReceive(e);
             }
         }
-
-        #endregion
-
-        #region Public functions
 
         protected ClientContext AddNewClient(Socket newClient)
         {
@@ -249,9 +222,25 @@ namespace SiS.Communication.Tcp
             IPEndPoint remoteIPEnd = (IPEndPoint)newClient.RemoteEndPoint;
             //save original ip end point, so we can always get the remote ip end point even the socket is closed.
             context.IPEndPoint = new IPEndPoint(remoteIPEnd.Address, remoteIPEnd.Port);
-            _clients.TryAdd((long)newClient.Handle, context);
+            bool bOK = _clients.TryAdd((long)newClient.Handle, context);
+            if (this is TcpClientEx)
+            {
+                System.Diagnostics.Trace.Assert(bOK, $"client:add new client failed:{this.GetHashCode()}   {newClient.Handle}");
+            }
+            else
+            {
+                System.Diagnostics.Trace.Assert(bOK, $"server:add new client failed:{this.GetHashCode()}   {newClient.Handle}");
+            }
+
             context.SockAsyncArgs.UserToken = (long)newClient.Handle;
-            NotifyClientStatusChangedAsync(context.ClientID, newClient.RemoteEndPoint as IPEndPoint, ClientStatus.Connected);
+            ClientStatusChangedEventArgs eventArgs = new ClientStatusChangedEventArgs()
+            {
+                ClientID = context.ClientID,
+                IPEndPoint = newClient.RemoteEndPoint as IPEndPoint,
+                Status = ClientStatus.Connected
+            };
+
+            OnClientStatusChanged(false, eventArgs, null);
             if (!newClient.ReceiveAsync(context.SockAsyncArgs))
             {
                 ProcessReceive(context.SockAsyncArgs);
@@ -259,47 +248,28 @@ namespace SiS.Communication.Tcp
             return context;
         }
 
-        protected void CloseClient(long clientID)
+        protected void CloseClient(bool isInThread, long clientID)
         {
-            if (_clients.ContainsKey(clientID))
+            if (_clients.TryRemove(clientID, out ClientContext clientContext))
             {
-                ClientContext clientContext = _clients[clientID];
                 IPEndPoint ipEndPt = clientContext.IPEndPoint;
                 clientContext.Status = ClientStatus.Closed;
                 clientContext.ClientSocket.Close();
                 clientContext.ClientSocket.Dispose();
                 clientContext.SockAsyncArgs.Completed -= SockAsyncArgs_Completed;
-                
-                if (_isRunning)
+                ClientStatusChangedEventArgs eventArgs = new ClientStatusChangedEventArgs()
                 {
-                    NotifyClientStatusChangedAsync(clientID, ipEndPt, ClientStatus.Closed);
-                }
-                _clients.TryRemove(clientID, out ClientContext n);
+                    ClientID = clientID,
+                    IPEndPoint = ipEndPt,
+                    Status = ClientStatus.Closed
+                };
+                OnClientStatusChanged(isInThread, eventArgs, clientContext.Groups);
                 if (_clientContextPool != null)
                 {
                     clientContext.Reset();
                     _clientContextPool.Push(clientContext);
                 }
             }
-        }
-
-        protected void CloseClients(IEnumerable<long> clientIDCollection)
-        {
-            if (clientIDCollection == null || !clientIDCollection.Any())
-            {
-                return;
-            }
-
-            foreach (long clientID in clientIDCollection)
-            {
-                CloseClient(clientID);
-            }
-        }
-
-        protected void CloseAllClients()
-        {
-            CloseClients(_clients.Keys);
-            _clients.Clear();
         }
 
         #endregion

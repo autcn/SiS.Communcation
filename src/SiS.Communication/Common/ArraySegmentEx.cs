@@ -19,6 +19,7 @@ namespace SiS.Communication
             Array.Copy(arraySegment.Array, arraySegment.Offset, newArray, 0, arraySegment.Count);
             return newArray;
         }
+
         /// <summary>
         /// Convert byte array segment to string with specific encoding.
         /// </summary>
