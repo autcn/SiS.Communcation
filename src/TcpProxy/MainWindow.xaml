@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TcpProxy"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen"
-        Title="TcpProxy" Height="450" Width="800" Loaded="Window_Loaded">
+        Title="TcpProxy" Height="450" Width="840" Loaded="Window_Loaded">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -29,12 +29,13 @@
                 <DataGridTemplateColumn Header="Status" Width="90" MinWidth="90">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Rectangle Width="60" Height="22" Fill="{Binding Path=IsRunning,Converter={StaticResource UniversalConverter},ConverterParameter=[Gray][true:Green]}" />
+                            <Rectangle Width="60" Height="22" Fill="{Binding Path=IsRunning,Converter={StaticResource UniversalConverter},ConverterParameter=[Gray][true:Lime]}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Name" MinWidth="120" Binding="{Binding Path=Name}" HeaderStyle="{StaticResource dgHeaderLeft}" ElementStyle="{StaticResource dgElementLeftStyle}" />
                 <DataGridTextColumn Header="ListenPort" MinWidth="90" Binding="{Binding Path=ListenPort}" ElementStyle="{StaticResource dgElementCenterStyle}"  />
+                <DataGridTextColumn Header="Con. Count" MinWidth="90" Binding="{Binding Path=ClientCount}" ElementStyle="{StaticResource dgElementCenterStyle}"  />
                 <DataGridTextColumn Header="RemoteIP" MinWidth="130" Binding="{Binding Path=RemoteIP}"  ElementStyle="{StaticResource dgElementCenterStyle}" />
                 <DataGridTextColumn Header="RemotePort" MinWidth="90" Binding="{Binding Path=RemotePort}" ElementStyle="{StaticResource dgElementCenterStyle}"  />
                 <DataGridTemplateColumn Header="Operation" Width="*" MinWidth="160" HeaderStyle="{StaticResource dgHeaderLeft}">

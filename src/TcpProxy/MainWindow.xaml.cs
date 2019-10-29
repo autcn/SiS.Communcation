@@ -1,22 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.IO;
-using SiS.Communication.Business;
+using System.Text;
+using System.Windows;
 using TcpProxy.Model;
 using TcpProxy.ViewModel;
-using Newtonsoft.Json;
 
 namespace TcpProxy
 {
@@ -28,17 +18,11 @@ namespace TcpProxy
         {
             InitializeComponent();
             _configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "channel.json");
-            //_channel = new TcpProxyChannel();
-            //_channel.RemoteIP = "127.0.0.1";
-            //_channel.RemotePort = 1433;
-            //_channel.ListenPort = 6001;
-            //_channel.Start();
         }
         #endregion
 
         #region Private members
         private string _configFilePath;
-        //private TcpProxyChannel _channel;
         private ObservableCollection<ProxyChannelItem> _channelVMList;
         #endregion
 

@@ -1,20 +1,21 @@
 ﻿using SiS.Communication.Business;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SiS.Communication.Tcp;
 using TcpProxy.Model;
 
 namespace TcpProxy.ViewModel
 {
-    public class ProxyChannelItem : NotifyBase
+    public class ProxyChannelItem : NotifyBase, ITcpProxyDataFilter
     {
+        #region Constructor
         public ProxyChannelItem()
         {
             _proxyChannel = new TcpProxyChannel();
+            _proxyChannel.DataFilter = this;
+            _proxyChannel.ClientCountChanged += _proxyChannel_ClientCountChanged;
         }
+        #endregion
 
+        #region Properties
         private string _name;
         public string Name
         {
@@ -86,7 +87,22 @@ namespace TcpProxy.ViewModel
         }
 
 
+        private int _clientCount = 0;
+        public int ClientCount
+        {
+            get { return _clientCount; }
+            set
+            {
+                if (value != _clientCount)
+                {
+                    _clientCount = value;
+                    NotifyPropertyChanged(nameof(ClientCount));
+                }
+            }
+        }
+        #endregion
 
+        #region Model Functions
 
         public static ProxyChannelItem FromModel(ProxyChannel model)
         {
@@ -122,7 +138,21 @@ namespace TcpProxy.ViewModel
             this.RemoteIP = pi.RemoteIP;
             this.RemotePort = pi.RemotePort;
         }
+
+        #endregion
+
+        #region Private members
         private TcpProxyChannel _proxyChannel;
+        #endregion
+
+        #region Private functions
+        private void _proxyChannel_ClientCountChanged(object sender, ClientCountChangedEventArgs args)
+        {
+            ClientCount = args.NewCount;
+        }
+        #endregion
+
+        #region Public functions
         public void StartService()
         {
             if (!_proxyChannel.IsRunning)
@@ -139,6 +169,23 @@ namespace TcpProxy.ViewModel
         {
             _proxyChannel.Stop();
             IsRunning = _proxyChannel.IsRunning;
+            ClientCount = 0;
         }
+
+        #endregion
+
+        #region Implements for ITcpProxyDataFilter 
+
+        public void BeforeClientToServer(TcpRawMessage clientMessage)
+        {
+            
+        }
+
+        public void BeforeServerToClient(TcpRawMessage serverMessage)
+        {
+
+        }
+
+        #endregion
     }
 }

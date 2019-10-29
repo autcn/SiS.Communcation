@@ -32,6 +32,13 @@ namespace SiS.Communication.Business
 
         #endregion
 
+        #region Events
+        /// <summary>
+        /// Represents the method that will handle the client count changed event of a SiS.Communication.Business.TcpProxyChannel object.
+        /// </summary>
+        public event ClientCountChangedEventHandler ClientCountChanged;
+        #endregion
+
         #region Properties
 
         private string _remoteIP;
@@ -100,9 +107,14 @@ namespace SiS.Communication.Business
         public bool IsRunning { get { return _server.IsRunning; } }
 
         /// <summary>
-        /// Gets or sets a a data filtering interface
+        /// Gets or sets data filtering interface
         /// </summary>
         public ITcpProxyDataFilter DataFilter { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that indicates the count of clients.
+        /// </summary>
+        public int ClientCount { get; private set; } = 0;
         #endregion
 
         #region Private functions
@@ -143,6 +155,12 @@ namespace SiS.Communication.Business
                 {
                     client.Close();
                 }
+            }
+            ClientCount = _server.Clients.Count;
+            if (ClientCountChanged != null)
+            {
+                ClientCountChangedEventArgs countChangedArgs = new ClientCountChangedEventArgs() { NewCount = ClientCount };
+                ClientCountChanged(this, countChangedArgs);
             }
         }
 
@@ -288,6 +306,21 @@ namespace SiS.Communication.Business
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Represents the method that will handle the tcp MessageReceived event.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="args">A SiS.Communication.Business.ClientCountChangedEventArgs object that contains the client count.</param>
+    public delegate void ClientCountChangedEventHandler(object sender, ClientCountChangedEventArgs args);
+
+    /// <summary>
+    /// Provides data for client count changed event.
+    /// </summary>
+    public class ClientCountChangedEventArgs : EventArgs
+    {
+        public int NewCount { get; set; }
     }
 
     public interface ITcpProxyDataFilter
