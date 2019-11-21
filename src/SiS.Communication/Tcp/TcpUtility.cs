@@ -37,12 +37,19 @@ namespace SiS.Communication.Tcp
         /// <param name="keepAliveInterval">The keep alive interval.</param>
         public static void SetKeepAlive(Socket socket, uint keepAliveTime, uint keepAliveInterval)
         {
-            byte[] inValue = new byte[12];
-            Array.Copy(BitConverter.GetBytes((int)1), 0, inValue, 0, 4);
-            Array.Copy(BitConverter.GetBytes(keepAliveTime), 0, inValue, 4, 4);
-            Array.Copy(BitConverter.GetBytes(keepAliveInterval), 0, inValue, 8, 4);
-
-            socket.IOControl(IOControlCode.KeepAliveValues, inValue, null);
+            //the following code is not supported in linux ,so try catch is used here.
+            try
+            {
+                byte[] inValue = new byte[12];
+                Array.Copy(BitConverter.GetBytes((int)1), 0, inValue, 0, 4);
+                Array.Copy(BitConverter.GetBytes(keepAliveTime), 0, inValue, 4, 4);
+                Array.Copy(BitConverter.GetBytes(keepAliveInterval), 0, inValue, 8, 4);
+                socket.IOControl(IOControlCode.KeepAliveValues, inValue, null);
+            }
+            catch
+            {
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            }
         }
     }
 
@@ -84,6 +91,8 @@ namespace SiS.Communication.Tcp
         /// </summary>
         /// <returns>The message received from the network.</returns>
         public TcpRawMessage Message { get; set; }
+
+        public Exception Error { get; set; }
     }
     /// <summary>
     /// Represents the method that will handle the tcp MessageReceived event.

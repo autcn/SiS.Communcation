@@ -125,12 +125,24 @@ namespace SiS.Communication.Tcp
                     }
 
                     //try get a completed packet
+                    List<ArraySegment<byte>> messageList = null;
+                    int endPos = 0;
                     try
                     {
-                        int endPos = 0;
-                        List<ArraySegment<byte>> messageList = _packetSpliter.GetPackets(clientRingBuffer.Buffer, 0, clientRingBuffer.DataLength, out endPos);
-
-                        if (messageList != null)
+                        messageList = _packetSpliter.GetPackets(clientRingBuffer.Buffer, 0, clientRingBuffer.DataLength, out endPos);
+                    }
+                    catch (Exception ex)
+                    {
+                        TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
+                        {
+                            Message = null,
+                            Error = ex
+                        };
+                        OnRawMessageReceived(rawMessage);
+                    }
+                    if (messageList != null)
+                    {
+                        try
                         {
                             clientRingBuffer.Remove(endPos);
                             foreach (ArraySegment<byte> messageSegment in messageList)
@@ -144,18 +156,18 @@ namespace SiS.Communication.Tcp
                                 OnRawMessageReceived(rawMessage);
                             }
                         }
-                    }
-                    catch (InvalidPacketException)
-                    {
-                        //invalid data received , indicates the client has made a illegal connection, we should disconnect it.
-                        _logger?.Info("illegal connection detected");
-                        if (_isRunning)
-                            CloseClient(true, (long)sockClient.Handle);
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger?.Warn("an error has occurred during get packets", ex.Message);
+                        catch (InvalidPacketException)
+                        {
+                            //invalid data received , indicates the client has made a illegal connection, we should disconnect it.
+                            _logger?.Info("illegal connection detected");
+                            if (_isRunning)
+                                CloseClient(true, (long)sockClient.Handle);
+                            return;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.Warn("an error has occurred during get packets", ex.Message);
+                        }
                     }
 
                     //in case of the socket is closed, the following statements may cause of exception, so we should use try catch

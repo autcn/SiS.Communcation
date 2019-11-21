@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SiS.Communication;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -81,7 +82,7 @@ namespace TcpProxy
             }
             catch (Exception ex)
             {
-                LocalMsgBox(ex.Message);
+                LocalMsgBox(ex.MessageAll());
             }
         }
 

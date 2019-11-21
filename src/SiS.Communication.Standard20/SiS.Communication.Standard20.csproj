@@ -37,6 +37,7 @@
     <Compile Include="..\SiS.Communication\Common\ByteArrayHelper.cs" Link="Common\ByteArrayHelper.cs" />
     <Compile Include="..\SiS.Communication\Common\ClientStatus.cs" Link="Common\ClientStatus.cs" />
     <Compile Include="..\SiS.Communication\Common\DynamicBuffer.cs" Link="Common\DynamicBuffer.cs" />
+    <Compile Include="..\SiS.Communication\Common\ExceptionEx.cs" Link="Common\ExceptionEx.cs" />
     <Compile Include="..\SiS.Communication\Common\Exceptions.cs" Link="Common\Exceptions.cs" />
     <Compile Include="..\SiS.Communication\Common\ILog.cs" Link="Common\ILog.cs" />
     <Compile Include="..\SiS.Communication\Common\LogWriter.cs" Link="Common\LogWriter.cs" />

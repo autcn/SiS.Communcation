@@ -280,6 +280,10 @@ namespace SiS.Communication.Tcp
                 {
                     if (!_isRunning)
                     {
+                        _syncContext.Post((state) =>
+                        {
+                            SetStatusAndNotify(ClientStatus.Closed);
+                        }, null);
                         return;
                     }
 

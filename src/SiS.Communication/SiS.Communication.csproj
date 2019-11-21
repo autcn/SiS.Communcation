@@ -53,6 +53,7 @@
     <Compile Include="Business\TcpModelClient.cs" />
     <Compile Include="Common\ClientStatus.cs" />
     <Compile Include="Common\DynamicBuffer.cs" />
+    <Compile Include="Common\ExceptionEx.cs" />
     <Compile Include="Common\Exceptions.cs" />
     <Compile Include="Common\ILog.cs" />
     <Compile Include="Common\LogWriter.cs" />
