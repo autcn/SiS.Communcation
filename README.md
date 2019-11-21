@@ -434,6 +434,67 @@ private void StartServer()
 ```
 <br>
 
+## TcpProxy Usage
+The library provides a TCP proxy class called TcpProxyChannel which is simple and very easy to use. 
+You can use this class to monitoring communication data and even modify the data.
+
+Sample:
+``` CSharp
+using SiS.Communication.Business;
+using SiS.Communication.Tcp;
+
+namespace TcpProxy.ViewModel
+{
+    public class ProxyChannelTest : ITcpProxyDataFilter
+    {
+        public ProxyChannelTest()
+        {
+            _proxyChannel = new TcpProxyChannel();
+            _proxyChannel.DataFilter = this;
+            _proxyChannel.ClientCountChanged += _proxyChannel_ClientCountChanged;
+        }
+        private TcpProxyChannel _proxyChannel;
+
+        //we can get the clients count according to the ClientCountChanged event handler.
+        private void _proxyChannel_ClientCountChanged(object sender, ClientCountChangedEventArgs args)
+        {
+            int clientsCount = args.NewCount;
+        }
+
+        public void StartService(int listenPort, string remoteIP, int remotePort)
+        {
+            if (!_proxyChannel.IsRunning)
+            {
+                _proxyChannel.ListenPort = listenPort;
+                _proxyChannel.RemoteIP = remoteIP;
+                _proxyChannel.RemotePort = remotePort;
+                _proxyChannel.Start();
+            }
+        }
+
+        public void StopService()
+        {
+            _proxyChannel.Stop();
+        }
+
+        //The implements for ITcpProxyDataFilter
+        //We can retrieve or modify the communication data in the following function.
+        public void BeforeClientToServer(TcpRawMessage clientMessage)
+        {
+
+        }
+        
+        public void BeforeServerToClient(TcpRawMessage serverMessage)
+        {
+
+        }
+    }
+}
+
+```
+
+<br>
+
 ## UDP Usage
 The UdpServer class is provided for UDP Communication. It uses a receving queue internally to avoid packet loss. 
 It's also very easy to use multicast.
@@ -804,3 +865,4 @@ Client:
         }
     }
 ```
+
