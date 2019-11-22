@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Net;
+using System.Linq;
 
 namespace SiS.Communication.Spliter
 {

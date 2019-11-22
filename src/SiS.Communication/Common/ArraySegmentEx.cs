@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace SiS.Communication
 {
@@ -9,6 +10,8 @@ namespace SiS.Communication
     /// </summary>
     public static class ArraySegmentExtension
     {
+
+#if NET40
         /// <summary>
         /// Greate a new array to save the data of the array segment.
         /// </summary>
@@ -19,6 +22,7 @@ namespace SiS.Communication
             Array.Copy(arraySegment.Array, arraySegment.Offset, newArray, 0, arraySegment.Count);
             return newArray;
         }
+#endif
 
         /// <summary>
         /// Convert byte array segment to string with specific encoding.

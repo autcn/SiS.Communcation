@@ -128,17 +128,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SiS.Communication\SiS.Communication.csproj">
-      <Project>{91ba755b-d3cd-47b7-9990-ac2749ec84bb}</Project>
-      <Name>SiS.Communication</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SiS.Communication\SiS.Communication.csproj">
+      <Project>{207ca660-0c1b-47b2-957f-d06f661e9383}</Project>
+      <Name>SiS.Communication</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

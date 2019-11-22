@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
+using System.Linq;
 
 namespace SiS.Communication.Business
 {
