@@ -100,6 +100,14 @@ namespace SiS.Communication
         }
 
         /// <summary>
+        /// Clear all the data in buffer.
+        /// </summary>
+        public void Clear()
+        {
+            SetLength(0);
+        }
+
+        /// <summary>
         /// Set the data length of DynamicBuffer.
         /// </summary>
         /// <param name="dataLength"></param>

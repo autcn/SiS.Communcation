@@ -99,7 +99,7 @@ namespace SiS.Communication.Tcp
             get { return _clientStatus; }
         }
 
-        
+
         private IPEndPoint _serverEndPoint;
         /// <summary>
         /// Gets or sets server ip end point.
@@ -441,16 +441,19 @@ namespace SiS.Communication.Tcp
         /// <returns>The number of bytes sent to the server.</returns>
         public int SendMessage(byte[] messageData, int offset, int count)
         {
-            if (_clientStatus != ClientStatus.Connected)
+            if (_clientStatus != ClientStatus.Connected || _clients.Count == 0)
             {
                 throw new Exception("the client is not connected");
             }
-            byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
+            //byte[] packetForSend
+            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, _clients.First().Value.SendBuffer);
             int sendTotal = 0;
-            while (sendTotal < packetForSend.Length)
+            int sendIndex = packetForSend.Offset;
+            while (sendTotal < packetForSend.Count)
             {
-                int single = _clientSocket.Send(packetForSend, sendTotal, packetForSend.Length - sendTotal, SocketFlags.None);
+                int single = _clientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
                 sendTotal += single;
+                sendIndex += single;
                 //if(single != packetForSend.Length)
                 //{
                 //    int a = 0;
@@ -483,12 +486,12 @@ namespace SiS.Communication.Tcp
         /// <returns>An System.IAsyncResult that references the asynchronous send.</returns>
         public IAsyncResult SendMessageAsync(byte[] messageData, int offset, int count, AsyncCallback callback, object state)
         {
-            if (_clientStatus != ClientStatus.Connected)
+            if (_clientStatus != ClientStatus.Connected || _clients.Count == 0)
             {
                 throw new Exception("the client is not connected");
             }
-            byte[] packetForSend = _packetSpliter.MakePacket(messageData, 0, count);
-            return _clientSocket.BeginSend(packetForSend, 0, packetForSend.Length, SocketFlags.None, callback, state);
+            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, _clients.First().Value.SendBuffer);
+            return _clientSocket.BeginSend(packetForSend.Array, packetForSend.Offset, packetForSend.Count, SocketFlags.None, callback, state);
         }
 
         /// <summary>

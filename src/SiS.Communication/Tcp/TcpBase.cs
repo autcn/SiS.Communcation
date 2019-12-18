@@ -29,7 +29,6 @@ namespace SiS.Communication.Tcp
         protected ClientContextPool _clientContextPool;
         protected ILog _logger;
         protected ConcurrentDictionary<long, ClientContext> _clients;
-
         #endregion
 
         #region Properties
@@ -220,12 +219,12 @@ namespace SiS.Communication.Tcp
             context.ClientSocket = newClient;
             context.ClientID = (long)newClient.Handle;
             context.Status = ClientStatus.Connected;
-            if (_tcpConfig.ReceiveDataMaxSpeed > 0)
+            if (_tcpConfig.ReceiveDataMaxSpeed != TcpConfig.NotLimited)
             {
                 context.RecvSpeedController.LimitSpeed = _tcpConfig.ReceiveDataMaxSpeed;
                 context.RecvSpeedController.Enabled = true;
             }
-            if (_tcpConfig.SendDataMaxSpeed > 0)
+            if (_tcpConfig.SendDataMaxSpeed != TcpConfig.NotLimited)
             {
                 context.SendController.LimitSpeed = _tcpConfig.SendDataMaxSpeed;
                 context.SendController.Enabled = true;

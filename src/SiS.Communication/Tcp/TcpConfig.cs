@@ -5,6 +5,7 @@
     /// </summary>
     public class TcpConfig
     {
+        public const int NotLimited = -1;
         /// <summary>
         /// Gets or sets a value indicating whether to enable keep alive or not.
         /// </summary>
@@ -32,13 +33,13 @@
         /// Gets or sets the limit speed for receiving, in bytes per second. 
         /// If the value is less or equal to 0,receiving speed control is disabled.The default is -1.
         /// </summary>
-        public int ReceiveDataMaxSpeed { get; set; } = -1;
+        public int ReceiveDataMaxSpeed { get; set; } = NotLimited;
 
         /// <summary>
         /// Gets or sets the limit speed for sending, in bytes per second. 
         /// If the value is less or equal to 0, sending speed control is disabled.The default is -1.
         /// </summary>
-        public int SendDataMaxSpeed { get; set; } = -1;
+        public int SendDataMaxSpeed { get; set; } = NotLimited;
 
 
     }

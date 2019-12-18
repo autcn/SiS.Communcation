@@ -18,6 +18,7 @@ namespace SiS.Communication.Process
         {
             _packetSpliter = new SimplePacketSpliter();
             _recvQueue = new RingQueue();
+            _sendBuffer = new DynamicBuffer();
             if (SynchronizationContext.Current != null)
             {
                 _syncContext = SynchronizationContext.Current;
@@ -32,6 +33,7 @@ namespace SiS.Communication.Process
         #endregion
 
         #region Protected Members
+        private DynamicBuffer _sendBuffer;
         protected PipeStream _pipeStream;
         protected Thread _workThread;
         protected string _pipeName;
@@ -123,8 +125,8 @@ namespace SiS.Communication.Process
             }
             if (_pipeStream.IsConnected)
             {
-                byte[] dataPacket = _packetSpliter.MakePacket(messageData, offset, count);
-                _pipeStream.Write(dataPacket, 0, dataPacket.Length);
+                ArraySegment<byte> dataPacket = _packetSpliter.MakePacket(messageData, offset, count, _sendBuffer);
+                _pipeStream.Write(dataPacket.Array, dataPacket.Offset, dataPacket.Count);
             }
         }
         /// <summary>

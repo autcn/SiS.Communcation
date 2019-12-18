@@ -22,6 +22,7 @@ namespace SiS.Communication.Process
             _uniqueName = uniqueName;
             _bufferSize = bufferSize;
             _packetSpliter = new SimplePacketSpliter();
+            _sendBuffer = new DynamicBuffer();
         }
         #endregion
 
@@ -36,6 +37,7 @@ namespace SiS.Communication.Process
         protected Mutex _mutex;
         private int _bufferSize;
         protected IPacketSpliter _packetSpliter;
+        private DynamicBuffer _sendBuffer;
         #endregion
 
         #region Properties
@@ -144,22 +146,22 @@ namespace SiS.Communication.Process
 
         protected bool WriteData(byte[] data, int offset, int count)
         {
-            byte[] messageData = null;
-            if (offset == 0 && data.Length == count)
-            {
-                messageData = data;
-            }
-            else
-            {
-                messageData = new byte[count];
-                Array.Copy(data, offset, messageData, 0, count);
-            }
-            byte[] packetData = _packetSpliter.MakePacket(data, offset, count);
+            //byte[] messageData = null;
+            //if (offset == 0 && data.Length == count)
+            //{
+            //    messageData = data;
+            //}
+            //else
+            //{
+            //    messageData = new byte[count];
+            //    Array.Copy(data, offset, messageData, 0, count);
+            //}
+            ArraySegment<byte> packetData = _packetSpliter.MakePacket(data, offset, count, _sendBuffer);
             int curDataLength = GetDataLength();
             int curPosition = curDataLength + 4;
-            if (WriteDataRaw(curPosition, packetData, offset, packetData.Length))
+            if (WriteDataRaw(curPosition, packetData.Array, offset, packetData.Count))
             {
-                curDataLength += packetData.Length;
+                curDataLength += packetData.Count;
                 WriteDataLength(curDataLength);
                 return true;
             }

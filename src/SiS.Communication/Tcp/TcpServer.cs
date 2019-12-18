@@ -88,73 +88,77 @@ namespace SiS.Communication.Tcp
         protected override void OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
         {
             ArraySegment<byte> rawSegment = args.Message.MessageRawData;
-            if (rawSegment.Count >= 4)
+            if(args.Error == null)
             {
-                UInt32 specialMark = BitConverter.ToUInt32(rawSegment.Array, rawSegment.Offset);
-                if (specialMark == TcpUtility.JOIN_GROUP_MARK)
+                if (rawSegment.Count >= 4)
                 {
-                    if (!EnableGroup)
+                    UInt32 specialMark = BitConverter.ToUInt32(rawSegment.Array, rawSegment.Offset);
+                    if (specialMark == TcpUtility.JOIN_GROUP_MARK)
                     {
-                        return;
-                    }
-
-                    JoinGroupMessage joinGroupMsg = null;
-                    if (!JoinGroupMessage.TryParse(rawSegment, out joinGroupMsg))
-                    {
-                        return;
-                    }
-
-                    if (_clients.TryGetValue(args.Message.ClientID, out ClientContext clientContext))
-                    {
-                        clientContext.Groups = joinGroupMsg.GroupSet;
-                        AddClientToGroup(clientContext);
-                    }
-                    return;
-                }
-                else if (specialMark == TcpUtility.GROUP_TRANSMIT_MSG_MARK
-                    || specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK)
-                {
-                    bool loopBack = specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK;
-                    if (!EnableGroup)
-                    {
-                        return;
-                    }
-                    GroupTransmitMessage transPacket = null;
-                    if (!GroupTransmitMessage.TryParse(rawSegment, out transPacket))
-                    {
-                        return;
-                    }
-                    try
-                    {
-                        if (!ServerConfig.AllowCrossGroupMessage)
+                        if (!EnableGroup)
                         {
-                            ClientContext sourceClient = GetClient(args.Message.ClientID);
-                            if (sourceClient == null || sourceClient.Groups == null || sourceClient.Groups.Count == 0)
+                            return;
+                        }
+
+                        JoinGroupMessage joinGroupMsg = null;
+                        if (!JoinGroupMessage.TryParse(rawSegment, out joinGroupMsg))
+                        {
+                            return;
+                        }
+
+                        if (_clients.TryGetValue(args.Message.ClientID, out ClientContext clientContext))
+                        {
+                            clientContext.Groups = joinGroupMsg.GroupSet;
+                            AddClientToGroup(clientContext);
+                        }
+                        return;
+                    }
+                    else if (specialMark == TcpUtility.GROUP_TRANSMIT_MSG_MARK
+                        || specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK)
+                    {
+                        bool loopBack = specialMark == TcpUtility.GROUP_TRANSMIT_MSG_LOOP_BACK_MARK;
+                        if (!EnableGroup)
+                        {
+                            return;
+                        }
+                        GroupTransmitMessage transPacket = null;
+                        if (!GroupTransmitMessage.TryParse(rawSegment, out transPacket))
+                        {
+                            return;
+                        }
+                        try
+                        {
+                            if (!ServerConfig.AllowCrossGroupMessage)
                             {
-                                return;
-                            }
-                            foreach (string groupName in transPacket.GroupNameCollection)
-                            {
-                                if (!sourceClient.Groups.Contains(groupName))
+                                ClientContext sourceClient = GetClient(args.Message.ClientID);
+                                if (sourceClient == null || sourceClient.Groups == null || sourceClient.Groups.Count == 0)
                                 {
                                     return;
                                 }
+                                foreach (string groupName in transPacket.GroupNameCollection)
+                                {
+                                    if (!sourceClient.Groups.Contains(groupName))
+                                    {
+                                        return;
+                                    }
+                                }
                             }
+                            SendGroupMessageAsync(transPacket.GroupNameCollection, transPacket.TransMessageData.Array, transPacket.TransMessageData.Offset, transPacket.TransMessageData.Count
+                                , loopBack ? -1 : args.Message.ClientID);
                         }
-                        SendGroupMessageAsync(transPacket.GroupNameCollection, transPacket.TransMessageData.Array, transPacket.TransMessageData.Offset, transPacket.TransMessageData.Count
-                            , loopBack ? -1 : args.Message.ClientID);
+                        catch (Exception ex)
+                        {
+                            _logger?.Warn("Transmit group message exception.", ex.Message);
+                        }
+                        return;
                     }
-                    catch (Exception ex)
-                    {
-                        _logger?.Warn("Transmit group message exception.", ex.Message);
-                    }
+                }
+                if (ReceivedMessageFilter(args))
+                {
                     return;
                 }
             }
-            if (ReceivedMessageFilter(args))
-            {
-                return;
-            }
+            
             MessageReceived?.Invoke(this, args);
             return;
         }
@@ -255,7 +259,8 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("can not send group message when EnableGroup property is false");
             }
-            byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
+            //byte[] packetForSend = 
+            ArraySegment<byte>? packetForSend = null; //
             foreach (string groupName in groupNameCollection)
             {
                 if (_groups.TryGetValue(groupName, out HashSet<long> clients))
@@ -264,7 +269,11 @@ namespace SiS.Communication.Tcp
                     {
                         if (clientID != exceptClientID && _clients.TryGetValue(clientID, out ClientContext clientContext))
                         {
-                            clientContext.ClientSocket.BeginSend(packetForSend, 0, packetForSend.Length, SocketFlags.None, null, null);
+                            if (packetForSend == null)
+                            {
+                                packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
+                            }
+                            clientContext.ClientSocket.BeginSend(packetForSend.Value.Array, packetForSend.Value.Offset, packetForSend.Value.Count, SocketFlags.None, null, null);
                         }
                     }
                 }
@@ -420,22 +429,26 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the server is not running");
             }
-            byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
+
             ClientContext clientContext = null;
             _clients.TryGetValue(clientID, out clientContext);
             if (clientContext == null)
             {
                 throw new Exception("the client is not exist");
             }
+
             if (clientContext.Status != ClientStatus.Connected)
             {
                 throw new Exception("the client is not connected");
             }
+            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
             int sendTotal = 0;
-            while (sendTotal < packetForSend.Length)
+            int sendIndex = packetForSend.Offset;
+            while (sendTotal < packetForSend.Count)
             {
-                int single = clientContext.ClientSocket.Send(packetForSend, sendTotal, packetForSend.Length - sendTotal, SocketFlags.None);
+                int single = clientContext.ClientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
                 sendTotal += single;
+                sendIndex += single;
             }
             return sendTotal;
         }
@@ -495,7 +508,8 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the server is not running");
             }
-            byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
+            //byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
+            ArraySegment<byte>? packetForSend = null;
             List<IAsyncResult> asyncResults = new List<IAsyncResult>();
             foreach (long clientID in clientIDCollection)
             {
@@ -507,7 +521,12 @@ namespace SiS.Communication.Tcp
                 }
                 try
                 {
-                    IAsyncResult iAsyncResult = clientContext.ClientSocket.BeginSend(packetForSend, 0, packetForSend.Length, SocketFlags.None, callback, clientContext);
+                    if (packetForSend == null)
+                    {
+                        packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
+                    }
+                    IAsyncResult iAsyncResult = clientContext.ClientSocket.BeginSend(packetForSend.Value.Array, packetForSend.Value.Offset,
+                        packetForSend.Value.Count, SocketFlags.None, callback, clientContext);
                     asyncResults.Add(iAsyncResult);
                 }
                 catch { }

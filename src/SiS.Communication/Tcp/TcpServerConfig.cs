@@ -24,24 +24,6 @@
         public int MaxPendingCount { get; set; } = 100;
 
         /// <summary>
-        /// Gets or sets the init count of client handlers.
-        /// </summary>
-        /// <returns>The init count of client handlers. The default is 4.</returns>
-        //public int InitHandlerCount { get; set; } = 4;
-
-        /// <summary>
-        /// Gets or sets the limited clients count in each handler.
-        /// </summary>
-        /// <returns>The limited clients count. The default is 10.</returns>
-        //public int MaxHandlerClientCount { get; set; } = 10;
-
-        /// <summary>
-        /// Gets or sets the max count of clients. The default is 100. 
-        /// If the value is bigger than 10000, 10000 will be set as the max count.
-        /// </summary>
-        public int MaxClientCount { get; set; } = 100;
-
-        /// <summary>
         /// Gets or sets a value indicating whether the message can be sent to groups that the client has not joined.
         /// </summary>
         public bool AllowCrossGroupMessage { get; set; } = true;

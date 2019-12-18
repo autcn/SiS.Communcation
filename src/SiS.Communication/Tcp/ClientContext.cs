@@ -19,6 +19,7 @@ namespace SiS.Communication.Tcp
             RecvSpeedController = new SpeedController();
             SendController = new SpeedController();
             RecvRawMessage = new TcpRawMessage();
+            SendBuffer = new DynamicBuffer();
         }
 
         /// <summary>
@@ -50,6 +51,11 @@ namespace SiS.Communication.Tcp
         /// Gets or sets the receive buffer.
         /// </summary>
         public RingQueue ReceiveBuffer { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the send buffer.
+        /// </summary>
+        public DynamicBuffer SendBuffer { get; private set; }
 
         /// <summary>
         /// Gets or sets the groups where the client is located.
@@ -92,6 +98,7 @@ namespace SiS.Communication.Tcp
             ClientID = default(long);
             IPEndPoint = null;
             ReceiveBuffer?.Clear();
+            SendBuffer?.Clear();
             Groups = null;
             Status = ClientStatus.Closed;
             RecvSpeedController?.Reset();

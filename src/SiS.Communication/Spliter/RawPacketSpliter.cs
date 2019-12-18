@@ -38,14 +38,11 @@ namespace SiS.Communication.Spliter
         /// <param name="messageData">The message data to convert.</param>
         /// <param name="offset">The offset of the message data.</param>
         /// <param name="count">The count of bytes to convert.</param>
-        /// <returns>The same packet data as input.</returns>
-        public byte[] MakePacket(byte[] messageData, int offset, int count)
+        /// <param name="sendBuffer">The send buffer which is associated with each connection. It is not used is this spliter.</param>
+        /// <returns>The same packed byte array segment as input.</returns>
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
         {
-            if (offset == 0 && count == messageData.Length)
-            {
-                return messageData;
-            }
-            return new ArraySegment<byte>(messageData, offset, count).ToArray();
+            return new ArraySegment<byte>(messageData, offset, count);
         }
 
         #endregion

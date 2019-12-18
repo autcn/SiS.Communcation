@@ -116,19 +116,24 @@ namespace SiS.Communication.Spliter
         /// <param name="messageData">The message data to convert.</param>
         /// <param name="offset">The offset of the message data.</param>
         /// <param name="count">The count of bytes to convert.</param>
-        /// <returns>The converted packet with end mark if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
-        public byte[] MakePacket(byte[] messageData, int offset, int count)
+        /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.</param>
+        /// <returns>The packed byte array segment with end mark if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
         {
             Contract.Requires(messageData != null && messageData.Length > 0);
             if (!UseMakePacket)
             {
-                if (offset == 0 && count == messageData.Length)
-                {
-                    return messageData;
-                }
-                return new ArraySegment<byte>(messageData, offset, count).ToArray();
+                return new ArraySegment<byte>(messageData, offset, count);
             }
-            return ByteArrayHelper.ByteArrayJoin(messageData, _endMark);
+            lock(sendBuffer)
+            {
+                sendBuffer.SetLength(count + _endMark.Length);
+                //write data
+                Array.Copy(messageData, offset, sendBuffer.Buffer, 0, count);
+                //write end mark
+                Array.Copy(_endMark, 0, sendBuffer.Buffer, count, _endMark.Length);
+                return new ArraySegment<byte>(sendBuffer.Buffer, 0, sendBuffer.DataLength);
+            }
         }
         #endregion
     }

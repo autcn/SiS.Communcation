@@ -70,27 +70,4 @@ namespace SiS.Communication
         }
         public MessageTypeNotRegisteredException() { }
     }
-
-    /// <summary>
-    /// Provides an extension of System.Exception class
-    /// </summary>
-    public static class ExceptionExtension
-    {
-        /// <summary>
-        /// Get exception description for current exception and all inner exceptions
-        /// </summary>
-        /// <param name="exception">An System.Exception to extend</param>
-        /// <returns>The exception description in multiple lines</returns>
-        public static string GetExceptionDes(this Exception exception)
-        {
-            if (exception == null)
-            {
-                return "";
-            }
-            string message = exception.Message;
-            return message + "\r\n" + GetExceptionDes(exception.InnerException);
-        }
-    }
-
-
 }

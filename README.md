@@ -44,10 +44,6 @@ public partial class ServerWnd : Window
     
     private void StartServer()
     {
-    }
-
-    private void StartServer()
-    {
         _tcpServer.Start(9999);
     }
 
