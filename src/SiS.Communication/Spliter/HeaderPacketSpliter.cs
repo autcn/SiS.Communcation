@@ -84,7 +84,7 @@ namespace SiS.Communication.Spliter
             {
                 packetLen = IPAddress.HostToNetworkOrder(dataLen);
             }
-            lock(sendBuffer)
+            lock (sendBuffer)
             {
                 sendBuffer.SetLength(8 + dataLen);
                 //write header
@@ -105,13 +105,14 @@ namespace SiS.Communication.Spliter
         /// <param name="streamBuffer">The source buffer to create packets.</param>
         /// <param name="offset">The starting offset of the buffer to create packets.</param>
         /// <param name="count">The count of the data to create packets.</param>
+        /// <param name="clientID">The client id of the data.</param>
         /// <param name="endPos">When this method returns, contains the position of the packet ending, if the buffer has 
         /// one complete packet at least, or null if the packet is not complete.</param>
         /// <returns>The packets list if has complete packet; otherwise, null.</returns>
-        public List<ArraySegment<byte>> GetPackets(byte[] streamBuffer, int offset, int count, out int endPos)
+        public List<DataPacket> GetPackets(byte[] streamBuffer, int offset, int count, long clientID, out int endPos)
         {
             int pos = offset;
-            List<ArraySegment<byte>> results = new List<ArraySegment<byte>>();
+            List<DataPacket> results = new List<DataPacket>();
             while (true)
             {
                 int finishedCount = pos - offset;
@@ -143,7 +144,11 @@ namespace SiS.Communication.Spliter
                 {
                     pos += 8;
                     ArraySegment<byte> packet = new ArraySegment<byte>(streamBuffer, pos, contentLen);
-                    results.Add(packet);
+                    results.Add(new DataPacket()
+                    {
+                        Data = packet,
+                        ClientID = clientID
+                    });
                     pos += contentLen;
                 }
                 else

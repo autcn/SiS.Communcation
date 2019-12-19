@@ -9,15 +9,16 @@ namespace SiS.Communication.Spliter
     public interface IPacketSpliter
     {
         /// <summary>
-        /// Get packets from a buffer by finding end mark.
+        /// Get packets from a buffer
         /// </summary>
         /// <param name="streamBuffer">The source buffer to create packets.</param>
         /// <param name="offset">The starting offset of the buffer to create packets.</param>
         /// <param name="count">The count of the data to create packets.</param>
-        /// <param name="endPos">When this method returns, contains the position of the last end mark, if the buffer has 
+        /// <param name="clientID">The client id of the data.</param>
+        /// <param name="endPos">When this method returns, contains the position of the packet ending if the buffer has 
         /// one complete packet at least, or zero if the end mark is not found.</param>
-        /// <returns>The packets list if the end mark is found; otherwise, null.</returns>
-        List<ArraySegment<byte>> GetPackets(byte[] streamBuffer, int offset, int count, out int endPos);
+        /// <returns>The packets list if the buffer has complete packet; otherwise, null.</returns>
+        List<DataPacket> GetPackets(byte[] streamBuffer, int offset, int count, long clientID, out int endPos);
 
         /// <summary>
         /// Convert a message to a packet using end mark.

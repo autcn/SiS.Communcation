@@ -69,14 +69,15 @@ namespace SiS.Communication.Spliter
         /// <param name="streamBuffer">The source buffer to create packets.</param>
         /// <param name="offset">The starting offset of the buffer to create packets.</param>
         /// <param name="count">The count of the data to create packets.</param>
+        /// <param name="clientID">The client id of the data.</param>
         /// <param name="endPos">When this method returns, contains the position of the last end mark, if the buffer has 
         /// one complete packet at least, or null if the end mark is not found.</param>
         /// <returns>The packets list if the end mark is found; otherwise, null.</returns>
-        public List<ArraySegment<byte>> GetPackets(byte[] streamBuffer, int offset, int count, out int endPos)
+        public List<DataPacket> GetPackets(byte[] streamBuffer, int offset, int count, long clientID,  out int endPos)
         {
             int pos = offset;
             //List<byte[]> packetList = new List<byte[]>();
-            List<ArraySegment<byte>> packetList = new List<ArraySegment<byte>>();
+            List<DataPacket> packetList = new List<DataPacket>();
             while (true)
             {
                 int finishedCount = pos - offset;
@@ -99,7 +100,11 @@ namespace SiS.Communication.Spliter
                 //byte[] packet = new byte[packetLen];
                 //Array.Copy(streamBuffer, pos, packet, 0, packetLen);
                 ArraySegment<byte> packet = new ArraySegment<byte>(streamBuffer, pos, packetLen);
-                packetList.Add(packet);
+                packetList.Add(new DataPacket()
+                {
+                    Data = packet,
+                    ClientID = clientID
+                });
                 pos += (resultPos - pos + _endMark.Length);
             }
             endPos = pos;

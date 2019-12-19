@@ -118,11 +118,11 @@ namespace SiS.Communication.Process
                     {
                         _recvQueue.Write(buffer, 0, readLen);
                         int endPos = 0;
-                        List<ArraySegment<byte>> packets = _packetSpliter.GetPackets(_recvQueue.Buffer, 0, _recvQueue.DataLength, out endPos);
+                        List<DataPacket> packets = _packetSpliter.GetPackets(_recvQueue.Buffer, 0, _recvQueue.DataLength, 0, out endPos);
                         if (packets != null && packets.Count > 0)
                         {
                             _recvQueue.Remove(endPos);
-                            foreach (ArraySegment<byte> message in packets)
+                            foreach (DataPacket message in packets)
                             {
                                 NotifyMessageReceived(message);
                             }

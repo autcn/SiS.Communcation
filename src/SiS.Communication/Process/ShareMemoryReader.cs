@@ -58,13 +58,13 @@ namespace SiS.Communication.Process
                 {
                     _recvBuffer.Write(readData);
                     int endPos = 0;
-                    List<ArraySegment<byte>> packets = _packetSpliter.GetPackets(_recvBuffer.Buffer, 0, _recvBuffer.DataLength, out endPos);
+                    List<DataPacket> packets = _packetSpliter.GetPackets(_recvBuffer.Buffer, 0, _recvBuffer.DataLength, 0, out endPos);
                     if (packets != null && packets.Count > 0)
                     {
                         _recvBuffer.Remove(endPos);
-                        foreach (ArraySegment<byte> message in packets)
+                        foreach (DataPacket message in packets)
                         {
-                            byte[] newData = message.ToArray();
+                            byte[] newData = message.Data.ToArray();
                             Task.Factory.StartNew((obj) =>
                             {
                                 MessageReceived?.Invoke(this, new DataMessageReceivedEventArgs() { Data = (byte[])obj });

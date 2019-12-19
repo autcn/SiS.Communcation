@@ -124,11 +124,11 @@ namespace SiS.Communication.Tcp
                     }
 
                     //try get a completed packet
-                    List<ArraySegment<byte>> messageList = null;
+                    List<DataPacket> messageList = null;
                     int endPos = 0;
                     try
                     {
-                        messageList = _packetSpliter.GetPackets(clientRingBuffer.Buffer, 0, clientRingBuffer.DataLength, out endPos);
+                        messageList = _packetSpliter.GetPackets(clientRingBuffer.Buffer, 0, clientRingBuffer.DataLength, clientID, out endPos);
                     }
                     catch (Exception ex)
                     {
@@ -144,10 +144,11 @@ namespace SiS.Communication.Tcp
                         try
                         {
                             clientRingBuffer.Remove(endPos);
-                            foreach (ArraySegment<byte> messageSegment in messageList)
+                            foreach (DataPacket messageSegment in messageList)
                             {
                                 clientContext.RecvRawMessage.ClientID = (long)sockClient.Handle;
-                                clientContext.RecvRawMessage.MessageRawData = messageSegment;
+                                clientContext.RecvRawMessage.MessageRawData = messageSegment.Data;
+                                clientContext.RecvRawMessage.Tag = messageSegment.Tag;
                                 TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
                                 {
                                     Message = clientContext.RecvRawMessage

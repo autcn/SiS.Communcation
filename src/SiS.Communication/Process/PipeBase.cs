@@ -87,9 +87,9 @@ namespace SiS.Communication.Process
 
         #region Protected Functions
 
-        protected void NotifyMessageReceived(ArraySegment<byte> byteSegment)
+        protected void NotifyMessageReceived(DataPacket dataPacket)
         {
-            byte[] data = byteSegment.ToArray();
+            byte[] data = dataPacket.Data.ToArray();
             Task.Factory.StartNew((tempData) =>
             {
                 MessageReceived?.Invoke(this, new DataMessageReceivedEventArgs() { Data = (byte[])tempData });
