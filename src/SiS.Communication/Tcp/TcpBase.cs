@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
     /// <summary>
@@ -135,7 +135,8 @@ namespace SiS.Communication.Tcp
                         TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
                         {
                             Message = null,
-                            Error = ex
+                            Error = ex,
+                            ClientID = clientID
                         };
                         OnRawMessageReceived(rawMessage);
                     }
@@ -151,7 +152,8 @@ namespace SiS.Communication.Tcp
                                 clientContext.RecvRawMessage.Tag = messageSegment.Tag;
                                 TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
                                 {
-                                    Message = clientContext.RecvRawMessage
+                                    Message = clientContext.RecvRawMessage,
+                                    ClientID = clientID
                                 };
                                 OnRawMessageReceived(rawMessage);
                             }

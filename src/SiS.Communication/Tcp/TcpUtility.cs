@@ -41,9 +41,9 @@ namespace SiS.Communication.Tcp
             try
             {
                 byte[] inValue = new byte[12];
-                Array.Copy(BitConverter.GetBytes((int)1), 0, inValue, 0, 4);
-                Array.Copy(BitConverter.GetBytes(keepAliveTime), 0, inValue, 4, 4);
-                Array.Copy(BitConverter.GetBytes(keepAliveInterval), 0, inValue, 8, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes((int)1), 0, inValue, 0, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(keepAliveTime), 0, inValue, 4, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(keepAliveInterval), 0, inValue, 8, 4);
                 socket.IOControl(IOControlCode.KeepAliveValues, inValue, null);
             }
             catch
@@ -92,6 +92,14 @@ namespace SiS.Communication.Tcp
         /// <returns>The message received from the network.</returns>
         public TcpRawMessage Message { get; set; }
 
+        /// <summary>
+        /// Gets or sets the id of the client where the message from.
+        /// </summary>
+        public long ClientID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error of the message.
+        /// </summary>
         public Exception Error { get; set; }
     }
     /// <summary>

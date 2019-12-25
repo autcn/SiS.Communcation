@@ -5,7 +5,11 @@
     /// </summary>
     public class TcpServerConfig : TcpConfig
     {
+        /// <summary>
+        /// The default configuration of tcp server.
+        /// </summary>
         public static TcpServerConfig Default { get; } = new TcpServerConfig();
+
         /// <summary>
         /// Initializes a new instance of the TcpServerConfig. 
         /// The default ReceiveDataMaxSpeed is 10M/S, in bytes.

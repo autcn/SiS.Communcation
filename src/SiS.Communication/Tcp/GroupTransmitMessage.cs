@@ -29,10 +29,10 @@ namespace SiS.Communication.Tcp
 
             byte[] messageData = new byte[4 + 4 + groupDesData.Length + realMessageData.Count];
 
-            Array.Copy(markHeaderData, 0, messageData, 0, 4);//copy mark
-            Array.Copy(groupLengthData, 0, messageData, 4, 4); //copy group length
-            Array.Copy(groupDesData, 0, messageData, 8, groupDesData.Length); //copy group name description
-            Array.Copy(realMessageData.Array, realMessageData.Offset, messageData, 8 + groupDesData.Length, realMessageData.Count);//copy real message data
+            Buffer.BlockCopy(markHeaderData, 0, messageData, 0, 4);//copy mark
+            Buffer.BlockCopy(groupLengthData, 0, messageData, 4, 4); //copy group length
+            Buffer.BlockCopy(groupDesData, 0, messageData, 8, groupDesData.Length); //copy group name description
+            Buffer.BlockCopy(realMessageData.Array, realMessageData.Offset, messageData, 8 + groupDesData.Length, realMessageData.Count);//copy real message data
             return messageData;
         }
 

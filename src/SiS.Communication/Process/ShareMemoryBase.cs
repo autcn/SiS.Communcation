@@ -3,7 +3,7 @@ using System;
 using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Threading;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Process
 {
     /// <summary>
@@ -22,7 +22,7 @@ namespace SiS.Communication.Process
             _uniqueName = uniqueName;
             _bufferSize = bufferSize;
             _packetSpliter = new SimplePacketSpliter();
-            _sendBuffer = new DynamicBuffer();
+            _sendBuffer = new DynamicBufferStream();
         }
         #endregion
 
@@ -37,7 +37,7 @@ namespace SiS.Communication.Process
         protected Mutex _mutex;
         private int _bufferSize;
         protected IPacketSpliter _packetSpliter;
-        private DynamicBuffer _sendBuffer;
+        private DynamicBufferStream _sendBuffer;
         #endregion
 
         #region Properties
@@ -154,18 +154,21 @@ namespace SiS.Communication.Process
             //else
             //{
             //    messageData = new byte[count];
-            //    Array.Copy(data, offset, messageData, 0, count);
+            //    Buffer.BlockCopy(data, offset, messageData, 0, count);
             //}
-            ArraySegment<byte> packetData = _packetSpliter.MakePacket(data, offset, count, _sendBuffer);
-            int curDataLength = GetDataLength();
-            int curPosition = curDataLength + 4;
-            if (WriteDataRaw(curPosition, packetData.Array, offset, packetData.Count))
+            lock(_sendBuffer)
             {
-                curDataLength += packetData.Count;
-                WriteDataLength(curDataLength);
-                return true;
+                ArraySegment<byte> packetData = _packetSpliter.MakePacket(data, offset, count, _sendBuffer);
+                int curDataLength = GetDataLength();
+                int curPosition = curDataLength + 4;
+                if (WriteDataRaw(curPosition, packetData.Array, offset, packetData.Count))
+                {
+                    curDataLength += packetData.Count;
+                    WriteDataLength(curDataLength);
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
 
         protected bool WriteData(byte[] messageData)

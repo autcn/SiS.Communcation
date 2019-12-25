@@ -49,7 +49,7 @@ namespace SiS.Communication.Spliter
         /// <param name="count">The count of bytes to convert.</param>
         /// <param name="sendBuffer">The send buffer which is associated with each connection. It is not used is this spliter.</param>
         /// <returns>The same packed byte array segment as input.</returns>
-        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer)
         {
             return new ArraySegment<byte>(messageData, offset, count);
         }

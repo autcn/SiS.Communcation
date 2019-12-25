@@ -57,6 +57,7 @@ namespace SiS.Communication.Business
             return QueryAsync<ResponseMessageBase>(requestMsg, timeout);
         }
 
+        /// <summary>
         /// Sending a request message and get a response.
         /// </summary>
         /// <param name="requestMsg">An instance int the type of RequestMessageBase.</param>

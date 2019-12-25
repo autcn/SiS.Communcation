@@ -6,7 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
     /// <summary>
@@ -87,9 +87,9 @@ namespace SiS.Communication.Tcp
 
         protected override void OnRawMessageReceived(TcpRawMessageReceivedEventArgs args)
         {
-            ArraySegment<byte> rawSegment = args.Message.MessageRawData;
-            if(args.Error == null)
+            if (args.Error == null)
             {
+                ArraySegment<byte> rawSegment = args.Message.MessageRawData;
                 if (rawSegment.Count >= 4)
                 {
                     UInt32 specialMark = BitConverter.ToUInt32(rawSegment.Array, rawSegment.Offset);
@@ -158,7 +158,7 @@ namespace SiS.Communication.Tcp
                     return;
                 }
             }
-            
+
             MessageReceived?.Invoke(this, args);
             return;
         }
@@ -185,15 +185,10 @@ namespace SiS.Communication.Tcp
         {
             foreach (string groupName in clientContext.Groups)
             {
-                HashSet<long> clients = null;
-                if (!_groups.ContainsKey(groupName))
+                if (!_groups.TryGetValue(groupName, out HashSet<long> clients))
                 {
                     clients = new HashSet<long>();
                     _groups.TryAdd(groupName, clients);
-                }
-                else
-                {
-                    clients = _groups[groupName];
                 }
                 clients.Add(clientContext.ClientID);
             }
@@ -259,8 +254,7 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("can not send group message when EnableGroup property is false");
             }
-            //byte[] packetForSend = 
-            ArraySegment<byte>? packetForSend = null; //
+            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, new DynamicBufferStream());
             foreach (string groupName in groupNameCollection)
             {
                 if (_groups.TryGetValue(groupName, out HashSet<long> clients))
@@ -269,11 +263,7 @@ namespace SiS.Communication.Tcp
                     {
                         if (clientID != exceptClientID && _clients.TryGetValue(clientID, out ClientContext clientContext))
                         {
-                            if (packetForSend == null)
-                            {
-                                packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
-                            }
-                            clientContext.ClientSocket.BeginSend(packetForSend.Value.Array, packetForSend.Value.Offset, packetForSend.Value.Count, SocketFlags.None, null, null);
+                            clientContext.ClientSocket.BeginSend(packetForSend.Array, packetForSend.Offset, packetForSend.Count, SocketFlags.None, null, null);
                         }
                     }
                 }
@@ -285,9 +275,47 @@ namespace SiS.Communication.Tcp
         #region Public functions
 
         /// <summary>
+        /// Add a client to specific group.
+        /// </summary>
+        /// <param name="clientID">The client id.</param>
+        /// <param name="groupName">The group that the client to join.</param>
+        public void AddClientToGroup(long clientID, string groupName)
+        {
+            ClientContext clientCtx = GetClient(clientID);
+            if (clientCtx != null)
+            {
+                if (clientCtx.Groups == null)
+                {
+                    clientCtx.Groups = new HashSet<string>();
+                }
+                if (!clientCtx.Groups.Contains(groupName))
+                {
+                    clientCtx.Groups.Add(groupName);
+                    AddClientToGroup(clientCtx);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get if the client is in specific group.
+        /// </summary>
+        /// <param name="clientID">The client id.</param>
+        /// <param name="groupName">The name of the group.</param>
+        /// <returns></returns>
+        public bool IsClientInGroup(long clientID, string groupName)
+        {
+            ClientContext clientCtx = GetClient(clientID);
+            if (clientCtx == null || clientCtx.Groups == null)
+            {
+                return false;
+            }
+            return clientCtx.Groups.Contains(groupName);
+        }
+
+        /// <summary>
         /// Start tcp server listening on a specific port.
         /// </summary>
-        /// <param name="nPort">The listening port of the server.</param>
+        /// <param name="listenPort">The listening port of the server.</param>
         public void Start(ushort listenPort)
         {
             Start(listenPort, TcpServerConfig.Default);
@@ -441,16 +469,19 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the client is not connected");
             }
-            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
-            int sendTotal = 0;
-            int sendIndex = packetForSend.Offset;
-            while (sendTotal < packetForSend.Count)
+            lock (clientContext.SendBuffer)
             {
-                int single = clientContext.ClientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
-                sendTotal += single;
-                sendIndex += single;
+                ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
+                int sendTotal = 0;
+                int sendIndex = packetForSend.Offset;
+                while (sendTotal < packetForSend.Count)
+                {
+                    int single = clientContext.ClientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
+                    sendTotal += single;
+                    sendIndex += single;
+                }
+                return sendTotal;
             }
-            return sendTotal;
         }
 
         /// <summary>
@@ -508,8 +539,8 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the server is not running");
             }
-            //byte[] packetForSend = _packetSpliter.MakePacket(messageData, offset, count);
-            ArraySegment<byte>? packetForSend = null;
+            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, new DynamicBufferStream());
+            //ArraySegment<byte>? packetForSend = null;
             List<IAsyncResult> asyncResults = new List<IAsyncResult>();
             foreach (long clientID in clientIDCollection)
             {
@@ -521,12 +552,8 @@ namespace SiS.Communication.Tcp
                 }
                 try
                 {
-                    if (packetForSend == null)
-                    {
-                        packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
-                    }
-                    IAsyncResult iAsyncResult = clientContext.ClientSocket.BeginSend(packetForSend.Value.Array, packetForSend.Value.Offset,
-                        packetForSend.Value.Count, SocketFlags.None, callback, clientContext);
+                    IAsyncResult iAsyncResult = clientContext.ClientSocket.BeginSend(packetForSend.Array, packetForSend.Offset,
+                        packetForSend.Count, SocketFlags.None, callback, clientContext);
                     asyncResults.Add(iAsyncResult);
                 }
                 catch { }

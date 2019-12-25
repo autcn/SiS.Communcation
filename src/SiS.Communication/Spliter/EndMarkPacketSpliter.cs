@@ -73,7 +73,7 @@ namespace SiS.Communication.Spliter
         /// <param name="endPos">When this method returns, contains the position of the last end mark, if the buffer has 
         /// one complete packet at least, or null if the end mark is not found.</param>
         /// <returns>The packets list if the end mark is found; otherwise, null.</returns>
-        public List<DataPacket> GetPackets(byte[] streamBuffer, int offset, int count, long clientID,  out int endPos)
+        public List<DataPacket> GetPackets(byte[] streamBuffer, int offset, int count, long clientID, out int endPos)
         {
             int pos = offset;
             //List<byte[]> packetList = new List<byte[]>();
@@ -85,7 +85,7 @@ namespace SiS.Communication.Spliter
                 {
                     break;
                 }
-                int resultPos = ByteArrayHelper.SearchByteArray(streamBuffer, pos,  count - finishedCount, _endMark);
+                int resultPos = ByteArrayHelper.SearchByteArray(streamBuffer, pos, count - finishedCount, _endMark);
                 if (resultPos == -1)
                 {
                     break;
@@ -98,7 +98,7 @@ namespace SiS.Communication.Spliter
 
                 int packetLen = _includeEndMark ? resultPos - pos + _endMark.Length : resultPos - pos;
                 //byte[] packet = new byte[packetLen];
-                //Array.Copy(streamBuffer, pos, packet, 0, packetLen);
+                //Buffer.BlockCopy(streamBuffer, pos, packet, 0, packetLen);
                 ArraySegment<byte> packet = new ArraySegment<byte>(streamBuffer, pos, packetLen);
                 packetList.Add(new DataPacket()
                 {
@@ -123,22 +123,20 @@ namespace SiS.Communication.Spliter
         /// <param name="count">The count of bytes to convert.</param>
         /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.</param>
         /// <returns>The packed byte array segment with end mark if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
-        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer)
         {
             Contract.Requires(messageData != null && messageData.Length > 0);
             if (!UseMakePacket)
             {
                 return new ArraySegment<byte>(messageData, offset, count);
             }
-            lock(sendBuffer)
-            {
-                sendBuffer.SetLength(count + _endMark.Length);
-                //write data
-                Array.Copy(messageData, offset, sendBuffer.Buffer, 0, count);
-                //write end mark
-                Array.Copy(_endMark, 0, sendBuffer.Buffer, count, _endMark.Length);
-                return new ArraySegment<byte>(sendBuffer.Buffer, 0, sendBuffer.DataLength);
-            }
+
+            sendBuffer.SetLength(count + _endMark.Length);
+            //write data
+            Buffer.BlockCopy(messageData, offset, sendBuffer.Buffer, 0, count);
+            //write end mark
+            Buffer.BlockCopy(_endMark, 0, sendBuffer.Buffer, count, _endMark.Length);
+            return new ArraySegment<byte>(sendBuffer.Buffer, 0, (int)sendBuffer.Length);
         }
         #endregion
     }

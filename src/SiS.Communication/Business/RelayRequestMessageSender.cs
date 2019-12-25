@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Business
 {
     /// <summary>
@@ -11,6 +11,11 @@ namespace SiS.Communication.Business
     public class RelayRequestMessageSender : IRequestMessageSender
     {
         #region Contructor
+        /// <summary>
+        /// Create an instance of RelayRequestMessageSender
+        /// </summary>
+        /// <param name="getTimeOut">A delegate that provide time out when wating the response of the request.</param>
+        /// <param name="sendModel">A delegate that used to send model.</param>
         public RelayRequestMessageSender(Func<int> getTimeOut, Action<long, RequestMessageBase> sendModel)
         {
             _getTimeOut = getTimeOut;

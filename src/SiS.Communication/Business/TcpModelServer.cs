@@ -1,7 +1,7 @@
 ﻿using SiS.Communication.Tcp;
 using System;
 using System.Threading.Tasks;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Business
 {
     /// <summary>
@@ -108,6 +108,7 @@ namespace SiS.Communication.Business
         /// <summary>
         /// Send a model message.
         /// </summary>
+        /// <param name="clientID">The destination client id to send message.</param>
         /// <param name="model">The model to be sent.</param>
         public void SendModelMessage(long clientID, object model)
         {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Process
 {
     /// <summary>
@@ -18,7 +18,7 @@ namespace SiS.Communication.Process
         {
             _packetSpliter = new SimplePacketSpliter();
             _recvQueue = new RingQueue();
-            _sendBuffer = new DynamicBuffer();
+            _sendBuffer = new DynamicBufferStream();
             if (SynchronizationContext.Current != null)
             {
                 _syncContext = SynchronizationContext.Current;
@@ -33,7 +33,7 @@ namespace SiS.Communication.Process
         #endregion
 
         #region Protected Members
-        private DynamicBuffer _sendBuffer;
+        private DynamicBufferStream _sendBuffer;
         protected PipeStream _pipeStream;
         protected Thread _workThread;
         protected string _pipeName;
@@ -125,8 +125,11 @@ namespace SiS.Communication.Process
             }
             if (_pipeStream.IsConnected)
             {
-                ArraySegment<byte> dataPacket = _packetSpliter.MakePacket(messageData, offset, count, _sendBuffer);
-                _pipeStream.Write(dataPacket.Array, dataPacket.Offset, dataPacket.Count);
+                lock(_sendBuffer)
+                {
+                    ArraySegment<byte> dataPacket = _packetSpliter.MakePacket(messageData, offset, count, _sendBuffer);
+                    _pipeStream.Write(dataPacket.Array, dataPacket.Offset, dataPacket.Count);
+                }
             }
         }
         /// <summary>

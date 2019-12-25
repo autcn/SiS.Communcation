@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
 namespace SiS.Communication.Business
 {
     /// <summary>
@@ -13,6 +12,9 @@ namespace SiS.Communication.Business
     public abstract class ModelMessageConvert
     {
         #region Constructor
+        /// <summary>
+        /// Create an instance of ModelMessageConvert
+        /// </summary>
         public ModelMessageConvert()
         {
             Type thisType = typeof(ModelMessageConvert);
@@ -137,7 +139,7 @@ namespace SiS.Communication.Business
         /// <summary>
         /// Get the descendants of the type in hosted assembly.
         /// </summary>
-        /// <param name="baseTypes">The type to get descendants.</param>
+        /// <param name="baseType">The type to get descendants.</param>
         /// <returns>The descendants of the input type.</returns>
         public static IEnumerable<Type> GetTypeDescendants(Type baseType)
         {

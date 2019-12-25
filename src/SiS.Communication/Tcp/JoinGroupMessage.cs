@@ -25,8 +25,8 @@ namespace SiS.Communication.Tcp
             byte[] markHeaderData = BitConverter.GetBytes(TcpUtility.JOIN_GROUP_MARK);
             byte[] groupDesData = Encoding.UTF8.GetBytes(groupNameDes);
             byte[] messageData = new byte[4 + groupDesData.Length];
-            Array.Copy(markHeaderData, 0, messageData, 0, 4);
-            Array.Copy(groupDesData, 0, messageData, 4, groupDesData.Length);
+            Buffer.BlockCopy(markHeaderData, 0, messageData, 0, 4);
+            Buffer.BlockCopy(groupDesData, 0, messageData, 4, groupDesData.Length);
             return messageData;
         }
         public static bool TryParse(ArraySegment<byte> messageRawData, out JoinGroupMessage outMessage)

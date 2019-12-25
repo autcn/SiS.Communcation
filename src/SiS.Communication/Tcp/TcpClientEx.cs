@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Linq;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
     /// <summary>
@@ -445,21 +445,19 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the client is not connected");
             }
-            //byte[] packetForSend
-            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, _clients.First().Value.SendBuffer);
-            int sendTotal = 0;
-            int sendIndex = packetForSend.Offset;
-            while (sendTotal < packetForSend.Count)
+            DynamicBufferStream sendBuffer = _clients.First().Value.SendBuffer;
+            lock (sendBuffer)
             {
-                int single = _clientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
-                sendTotal += single;
-                sendIndex += single;
-                //if(single != packetForSend.Length)
-                //{
-                //    int a = 0;
-                //}
+                ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, sendBuffer);
+                int sendTotal = 0;
+                int sendIndex = packetForSend.Offset;
+                while (sendTotal < packetForSend.Count)
+                {
+                    int single = _clientSocket.Send(packetForSend.Array, sendIndex, packetForSend.Count - sendTotal, SocketFlags.None);
+                    sendTotal += single;
+                    sendIndex += single;
+                }
             }
-            //return _clientSocket.Send(packetForSend);
             return messageData.Length;
         }
 
@@ -490,8 +488,12 @@ namespace SiS.Communication.Tcp
             {
                 throw new Exception("the client is not connected");
             }
-            ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, _clients.First().Value.SendBuffer);
-            return _clientSocket.BeginSend(packetForSend.Array, packetForSend.Offset, packetForSend.Count, SocketFlags.None, callback, state);
+            DynamicBufferStream sendBuffer = _clients.First().Value.SendBuffer;
+            lock (sendBuffer)
+            {
+                ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, sendBuffer);
+                return _clientSocket.BeginSend(packetForSend.Array, packetForSend.Offset, packetForSend.Count, SocketFlags.None, callback, state);
+            }
         }
 
         /// <summary>

@@ -11,6 +11,9 @@ namespace SiS.Communication.Business
     /// </summary>
     public abstract class RequestMessageBase : ModelMessageBase
     {
+        /// <summary>
+        /// Create an instance of RequestMessageBase
+        /// </summary>
         public RequestMessageBase()
         {
             ID = new Guid();

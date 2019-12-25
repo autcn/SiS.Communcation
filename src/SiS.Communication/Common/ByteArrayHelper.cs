@@ -7,16 +7,16 @@ namespace SiS.Communication
         public static byte[] ByteArrayJoin(byte[] array1, byte[] array2)
         {
             byte[] resData = new byte[array1.Length + array2.Length];
-            Array.Copy(array1, resData, array1.Length);
-            Array.Copy(array2, 0, resData, array1.Length, array2.Length);
+            Buffer.BlockCopy(array1, 0, resData, 0, array1.Length);
+            Buffer.BlockCopy(array2, 0, resData, array1.Length, array2.Length);
             return resData;
         }
 
         public static byte[] ByteArrayJoin(ArraySegment<byte> array1, byte[] array2)
         {
             byte[] resData = new byte[array1.Count + array2.Length];
-            Array.Copy(array1.Array, array1.Offset, resData, 0, array1.Count);
-            Array.Copy(array2, 0, resData, array1.Count, array2.Length);
+            Buffer.BlockCopy(array1.Array, array1.Offset, resData, 0, array1.Count);
+            Buffer.BlockCopy(array2, 0, resData, array1.Count, array2.Length);
             return resData;
         }
 

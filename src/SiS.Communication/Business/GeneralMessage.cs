@@ -62,7 +62,7 @@ namespace SiS.Communication.Business
             if (Payload != null)
             {
                 _innerBuffer = new byte[Payload.Count];
-                Array.Copy(Payload.Array, Payload.Offset, _innerBuffer, 0, _innerBuffer.Length);
+                Buffer.BlockCopy(Payload.Array, Payload.Offset, _innerBuffer, 0, _innerBuffer.Length);
                 Payload = new ArraySegment<byte>(_innerBuffer);
             }
         }

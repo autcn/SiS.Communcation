@@ -63,7 +63,7 @@ namespace SiS.Communication.Spliter
         /// <param name="count">The count of bytes to convert.</param>
         /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.</param>
         /// <returns>The packed byte array segment with length if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
-        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer)
         {
             Contract.Requires(messageData != null && count > 0);
             if (!UseMakePacket)
@@ -76,13 +76,11 @@ namespace SiS.Communication.Spliter
             {
                 packetLen = IPAddress.HostToNetworkOrder(dataLen);
             }
-            lock (sendBuffer)
-            {
-                sendBuffer.SetLength(4 + dataLen);
-                Array.Copy(BitConverter.GetBytes(packetLen), 0, sendBuffer.Buffer, 0, 4);
-                Array.Copy(messageData, offset, sendBuffer.Buffer, 4, dataLen);
-                return new ArraySegment<byte>(sendBuffer.Buffer, 0, sendBuffer.DataLength);
-            }
+
+            sendBuffer.SetLength(4 + dataLen);
+            Buffer.BlockCopy(BitConverter.GetBytes(packetLen), 0, sendBuffer.Buffer, 0, 4);
+            Buffer.BlockCopy(messageData, offset, sendBuffer.Buffer, 4, dataLen);
+            return new ArraySegment<byte>(sendBuffer.Buffer, 0, (int)sendBuffer.Length);
         }
 
         /// <summary>

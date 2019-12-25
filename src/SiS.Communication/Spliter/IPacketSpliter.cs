@@ -26,9 +26,8 @@ namespace SiS.Communication.Spliter
         /// <param name="messageData">The message data to convert.</param>
         /// <param name="offset">The offset of the message data.</param>
         /// <param name="count">The count of bytes to convert.</param>
-        /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.
-        /// A lock must be used when the function is called in multi-threads. Of course, you can choose not to use.</param>
+        /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.</param>
         /// <returns>The packed array segment.</returns>
-        ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer);
+        ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer);
     }
 }

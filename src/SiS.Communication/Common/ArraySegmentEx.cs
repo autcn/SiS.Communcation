@@ -19,7 +19,7 @@ namespace SiS.Communication
         public static T[] ToArray<T>(this ArraySegment<T> arraySegment)
         {
             T[] newArray = new T[arraySegment.Count];
-            Array.Copy(arraySegment.Array, arraySegment.Offset, newArray, 0, arraySegment.Count);
+            Buffer.BlockCopy(arraySegment.Array, arraySegment.Offset, newArray, 0, arraySegment.Count);
             return newArray;
         }
 #endif
@@ -27,6 +27,7 @@ namespace SiS.Communication
         /// <summary>
         /// Convert byte array segment to string with specific encoding.
         /// </summary>
+        /// <param name="arraySegment">The byte array segment that will be converted to string.</param>
         /// <param name="encoding">The character encoding used in conversion.</param>
         /// <returns>The converted string from byte array segment.</returns>
         public static string ToString(this ArraySegment<byte> arraySegment, Encoding encoding)

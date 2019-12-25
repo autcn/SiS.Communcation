@@ -5,6 +5,9 @@
     /// </summary>
     public class TcpConfig
     {
+        /// <summary>
+        /// A const value that indicates the speed is not limited.
+        /// </summary>
         public const int NotLimited = -1;
         /// <summary>
         /// Gets or sets a value indicating whether to enable keep alive or not.

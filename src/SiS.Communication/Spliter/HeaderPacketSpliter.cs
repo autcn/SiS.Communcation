@@ -19,7 +19,7 @@ namespace SiS.Communication.Spliter
         /// Initializes a new instance of the SiS.Communication.Spliter.HeaderPacketSpliter
         /// </summary>
         /// <param name="useNetworkByteOrder">true to pack length in network byte order; otherwise, int host byte order.</param>
-        /// <param name="headerTag">A 32-bit integer as packet header tag to prevent illegal network data./param>
+        /// <param name="headerTag">A 32-bit integer as packet header tag to prevent illegal network data.</param>
         public HeaderPacketSpliter(bool useNetworkByteOrder, UInt32 headerTag)
         {
             UseNetworkByteOrder = useNetworkByteOrder;
@@ -70,7 +70,7 @@ namespace SiS.Communication.Spliter
         /// <param name="count">The count of bytes to convert.</param>
         /// <param name="sendBuffer">The send buffer which is associated with each connection. It is used to avoid allocating memory every time.</param>
         /// <returns>The packed byte array segment with length and header tag if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
-        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBuffer sendBuffer)
+        public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer)
         {
             Contract.Requires(messageData != null && count > 0);
             if (!UseMakePacket)
@@ -84,19 +84,17 @@ namespace SiS.Communication.Spliter
             {
                 packetLen = IPAddress.HostToNetworkOrder(dataLen);
             }
-            lock (sendBuffer)
+
+            sendBuffer.SetLength(8 + dataLen);
+            //write header
+            Buffer.BlockCopy(BitConverter.GetBytes(_headerTag), 0, sendBuffer.Buffer, 0, 4);
+            //write message length
+            Buffer.BlockCopy(BitConverter.GetBytes(packetLen), 0, sendBuffer.Buffer, 4, 4);
+            if (dataLen > 0)
             {
-                sendBuffer.SetLength(8 + dataLen);
-                //write header
-                Array.Copy(BitConverter.GetBytes(_headerTag), 0, sendBuffer.Buffer, 0, 4);
-                //write message length
-                Array.Copy(BitConverter.GetBytes(packetLen), 0, sendBuffer.Buffer, 4, 4);
-                if (dataLen > 0)
-                {
-                    Array.Copy(messageData, offset, sendBuffer.Buffer, 8, dataLen);
-                }
-                return new ArraySegment<byte>(sendBuffer.Buffer, 0, sendBuffer.DataLength);
+                Buffer.BlockCopy(messageData, offset, sendBuffer.Buffer, 8, dataLen);
             }
+            return new ArraySegment<byte>(sendBuffer.Buffer, 0, (int)sendBuffer.Length);
         }
 
         /// <summary>

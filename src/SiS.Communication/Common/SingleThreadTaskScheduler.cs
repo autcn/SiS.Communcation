@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
+#pragma warning disable 1591
 namespace SiS.Communication
 {
     /// <summary>
@@ -11,7 +11,13 @@ namespace SiS.Communication
     /// </summary>
     public enum BufferType
     {
+        /// <summary>
+        /// Represent a policy that the data will be add to a queue waiting for processing.
+        /// </summary>
         Queue,
+        /// <summary>
+        /// Represent a policy that if the old data is not processed in time, it will be overlapped by new data.
+        /// </summary>
         Overlapped
     }
 

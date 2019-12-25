@@ -14,6 +14,9 @@ namespace SiS.Communication.Business
     public class TcpProxyChannel
     {
         #region Constructor
+        /// <summary>
+        /// Create an instance of TcpProxyChannel
+        /// </summary>
         public TcpProxyChannel()
         {
             _server = new TcpServer(RawPacketSpliter.Default);
@@ -321,12 +324,26 @@ namespace SiS.Communication.Business
     /// </summary>
     public class ClientCountChangedEventArgs : EventArgs
     {
+        /// <summary>
+        /// The new count of clients.
+        /// </summary>
         public int NewCount { get; set; }
     }
 
+    /// <summary>
+    /// The interface used for data filter.
+    /// </summary>
     public interface ITcpProxyDataFilter
     {
+        /// <summary>
+        /// The function will be called before client send message to server.
+        /// </summary>
+        /// <param name="clientMessage"></param>
         void BeforeClientToServer(TcpRawMessage clientMessage);
+        /// <summary>
+        /// The function will be called before server send message to client.
+        /// </summary>
+        /// <param name="serverMessage"></param>
         void BeforeServerToClient(TcpRawMessage serverMessage);
     }
 }

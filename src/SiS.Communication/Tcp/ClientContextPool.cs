@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-
+#pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
     /// <summary>

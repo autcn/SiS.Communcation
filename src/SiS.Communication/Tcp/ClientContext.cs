@@ -19,18 +19,13 @@ namespace SiS.Communication.Tcp
             RecvSpeedController = new SpeedController();
             SendController = new SpeedController();
             RecvRawMessage = new TcpRawMessage();
-            SendBuffer = new DynamicBuffer();
+            SendBuffer = new DynamicBufferStream();
         }
 
         /// <summary>
         /// Gets or sets the user data.
         /// </summary>
         public object Tag { get; set; }
-
-        /// <summary>
-        /// Gets or sets the id of the hander that contains the client.
-        /// </summary>
-        //public Guid HandlerID { get; set; }
 
         /// <summary>
         /// Gets or sets the basic Socket.
@@ -55,7 +50,7 @@ namespace SiS.Communication.Tcp
         /// <summary>
         /// Gets or sets the send buffer.
         /// </summary>
-        public DynamicBuffer SendBuffer { get; private set; }
+        public DynamicBufferStream SendBuffer { get; private set; }
 
         /// <summary>
         /// Gets or sets the groups where the client is located.
