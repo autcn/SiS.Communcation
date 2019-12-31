@@ -16,7 +16,6 @@
             }
         }
 
-
         private string _serverRecvText;
         public string ServerRecvText
         {

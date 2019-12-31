@@ -229,7 +229,7 @@ namespace SiS.Communication
         }
 
         /// <summary>
-        /// Sets the length of the current stream.
+        /// Sets the length of the current stream.If the postion is less than length, it will be set to length.
         /// </summary>
         /// <param name="dataLength">The desired length of the current stream in bytes.</param>
         public override void SetLength(long dataLength)

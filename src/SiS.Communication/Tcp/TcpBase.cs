@@ -130,6 +130,10 @@ namespace SiS.Communication.Tcp
                     {
                         messageList = _packetSpliter.GetPackets(clientRingBuffer.Buffer, 0, clientRingBuffer.DataLength, clientID, out endPos);
                     }
+                    catch (NotImplementedException)
+                    {
+                        clientRingBuffer.Clear();
+                    }
                     catch (Exception ex)
                     {
                         TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
