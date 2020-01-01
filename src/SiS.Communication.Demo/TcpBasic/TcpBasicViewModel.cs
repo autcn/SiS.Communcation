@@ -1,5 +1,6 @@
 ﻿using SiS.Communication.Spliter;
 using SiS.Communication.Tcp;
+using System.Linq;
 
 namespace SiS.Communication.Demo
 {

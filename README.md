@@ -1,7 +1,8 @@
 # SiS.Communcation
 ## Features
-This project provides a variety of communication components for .NET, including TCP, UDP, process communication. 
+This project provides a variety of communication components for .NET, including TCP, UDP, HTTP, process communication. 
 TCP communication provided in libraries is very powerful, efficient and easy to use.
+It contains a lightweight HTTP server and supports websocket.
 ## TCP Usage
 ### 1.Basic Usage
 
@@ -487,6 +488,192 @@ namespace TcpProxy.ViewModel
     }
 }
 
+```
+
+<br>
+
+## HTTP Server Usage
+The http server provided in library is lightweight but efficient. The performance under windows operating system is better
+than linux, because the underlying implementations of socket are different. I compared the performance of the popular http servers.
+The test enviroment is that 200 threads request the same static resources at the same time, and each thread will get 20 static files, include js, css, html and so on.
+So the total request count is 4000. I recorded the total requested time(in seconds) and got a form:
+
+|Platform|IIS|Apache|Nginx|SiS|
+|:-:|:-:|:-:|:-:|:-:|
+| Linux | X | 5.5/900(gzip) | 3.3/300(gzip) | 200/480(gzip) |
+| Windows | 3.7(gzip) | 8.4/14.8(gzip) | 152/278(gzip) |50/87(gzip) |
+
+According to the above results, it cost more time if the server enable gzip compression.  
+Because the CPU performance of the linux server used for testing is very poor, so under linux system, 
+the gzip compression cost a lot of time. 
+
+
+<font color=red>Note: The http server is not supported on .net Framework 4.0. </font>
+
+Sample:
+
+``` CSharp
+    public class HttpViewModel : PageBaseViewModel
+    {
+        public HttpViewModel(string title) : base(title)
+        {
+            _httpServer = new HttpServer();
+            _websocketHandler = new WebsocketHandler("/ws");
+            _staticFileHandler = new StaticFileHandler();
+            _staticFileHandler.DefaultFiles.Add("index.html");
+            _httpServer.Handlers.Add(_websocketHandler);
+            _httpServer.Handlers.Add(_staticFileHandler);
+            _httpServer.UnhandledRequestReceived += _httpServer_UnhandledRequestReceived;
+            _httpServer.WebSocketDataReceived += _httpServer_WSDataReceived;
+            _httpServer.WebSocketStatusChanged += _httpServer_WebSocketStatusChanged;
+        }
+        
+        private HttpServer _httpServer;
+        private StaticFileHandler _staticFileHandler;
+        private WebsocketHandler _websocketHandler;
+
+
+        private IClientContext _selectedClient;
+        public IClientContext SelectedClient
+        {
+            get { return _selectedClient; }
+            set
+            {
+                if (value != _selectedClient)
+                {
+                    _selectedClient = value;
+                    NotifyPropertyChanged(nameof(SelectedClient));
+                }
+            }
+        }
+
+        private void _httpServer_WSDataReceived(object sender, WebSocketDataReceivedEventArgs args)
+        {
+            WebSocketPacket wspacket = args.DataPacket;
+            if (wspacket.DataType == WSPacketType.Text)
+            {
+                string strText = Encoding.UTF8.GetString(wspacket.Data.Array, wspacket.Data.Offset, wspacket.Data.Count);
+
+            }
+        }
+
+        private void _httpServer_WebSocketStatusChanged(object sender, WebSocketStatusChangedEventArgs args)
+        {
+
+        }
+
+        private void _httpServer_UnhandledRequestReceived(object sender, UnhandledRequestReceivedEventArgs args)
+        {
+            HttpRequestMessage requestMsg = args.Context.Request;
+            if (requestMsg.Content is BlockStreamContent StreamContent)
+            {
+                BlockStream stream = StreamContent.Stream;
+                FileStream fs = null;
+                try
+                {
+                    fs = File.Open("d:\\upload\\test.zip", FileMode.Create, FileAccess.Write);
+                    stream.CopyTo(fs);
+                }
+                finally
+                {
+                    if (fs != null)
+                    {
+                        fs.Close();
+                    }
+                }
+
+                HttpResponseMessage responseMsg = ResponseMsgHelper.CreateSimpleRepMsg();
+                args.Context.Response = responseMsg;
+            }
+            else if (requestMsg.Content is ByteArrayContent)
+            {
+
+            }
+        }
+
+        public void StartServer()
+        {
+            if (_httpServer.IsRunning)
+            {
+                return;
+            }
+            _staticFileHandler.RootDir = "e:\\wwwroot";
+            _staticFileHandler.EnableGZIP = true;
+            HttpServerConfig config = new HttpServerConfig();
+            config.TcpConfig.MaxPendingCount = 10000;
+            config.TcpConfig.MaxClientCount = 2000;
+            config.TcpConfig.SocketAsyncBufferSize = 100 * 1024;
+            try
+            {
+                _httpServer.Start(80, config);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void StopServer()
+        {
+            _httpServer.Stop();
+        }
+
+        public void WebsocketSend()
+        {
+            if (SelectedClient == null)
+            {
+                MessageBox.Show("Please select the client that you want to send message.");
+                return;
+            }
+
+            try
+            {
+                _httpServer.WebSocketSendText(SelectedClient, "this is websocket client");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        public void WebsocketDisconnect()
+        {
+            if (SelectedClient == null)
+            {
+                MessageBox.Show("Please select the client that you want to disconnect.");
+                return;
+            }
+            try
+            {
+                _httpServer.WebSocketCloseClient(SelectedClient);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+    }
+```
+<br>
+
+Inherit from HttpHandler class, the users can define their own handlers to handle http requests.
+
+Create a handler:
+``` CSharp
+public class MyHttpHandler : HttpHandler
+{
+    public override void Process(HttpContext context)
+    {
+        //The user must set the Response proprety of the context, which indicating the request is handled. 
+        //If the Response is not set, the request will be passed to next handler. If none of handler handle the request, 
+        //the UnhandledRequestReceived event of HttpServer will be triggered.
+        context.Response = ResponseMsgHelper.CreateSimpleRepMsg();
+    }
+}
+```
+
+Add the hander to http server:
+``` CSharp
+_httpServer.Handlers.Add(new MyHttpHandler());
 ```
 
 <br>

@@ -23,7 +23,12 @@ namespace SiS.Communication.Demo
                 new ShareMemoryViewModel(),
                 new ShareMemoryDuplexViewModel(),
                 new UdpViewModel(),
+                new HttpViewModel()
             };
+            foreach(PageBaseViewModel vm in _tabDataSource)
+            {
+                vm.Initialize();
+            }
             tabCtrl.ItemsSource = _tabDataSource;
         }
     }

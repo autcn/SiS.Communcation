@@ -8,19 +8,19 @@
     <PackageId>SiS.Communication</PackageId>
     <Authors>WQ</Authors>
     <Company>Starting Future</Company>
-    <Description>This library provides a variety of communication components for .NET, including TCP, UDP, process communication. TCP communication provided in libraries is very powerful, efficient and easy to use.</Description>
+    <Description>This library provides a variety of communication components for .NET, including TCP, UDP, HTTP, process communication. TCP communication provided in libraries is very powerful, efficient and easy to use.</Description>
     <Copyright>Copyright © Starting Future(Beijing) Technology Co., Ltd.</Copyright>
     <RepositoryUrl>https://github.com/autcn/SiS.Communcation.git</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>tcp,udp,sis,com,process</PackageTags>
+    <PackageTags>tcp,udp,http,sis,com,process</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/autcn/SiS.Communcation</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    <FileVersion>1.1.1.0</FileVersion>
-    <Version>1.1.2</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,12 +31,38 @@
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'=='net40'">
+    <Compile Remove="Http\BlockStream.cs" />
+    <Compile Remove="Common\DataZip.cs" />
+    <Compile Remove="Http\HttpContext.cs" />
+	<Compile Remove="Http\HttpClientContext.cs" />
+	<Compile Remove="Http\BlockStreamContent.cs" />
+    <Compile Remove="Http\HttpHandler.cs" />
+    <Compile Remove="Http\HttpPacket.cs" />
+    <Compile Remove="Http\HttpServer.cs" />
+	<Compile Remove="Http\HttpEvents.cs" />
+    <Compile Remove="Http\HttpServerConfig.cs" />
+    <Compile Remove="Http\ResponseMsgHelper.cs" />
+    <Compile Remove="Http\StaticFileHandler.cs" />
+    <Compile Remove="Http\WebsocketHandler.cs" />
+    <Compile Remove="Http\WebSocketPacket.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Http\HttpServer2.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Remove="Common\.gitkeep" />
     <None Remove="Process\.gitkeep" />
     <None Remove="Tcp\.gitkeep" />
     <None Remove="Spliter\.gitkeep" />
     <None Remove="Udp\.gitkeep" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net45'">
+    <Reference Include="System.Net.Http" />
+	<Reference Include="System.Web" />
   </ItemGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)'=='net45'">

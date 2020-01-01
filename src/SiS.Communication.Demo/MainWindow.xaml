@@ -35,6 +35,9 @@
             <local:UdpView />
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type local:HttpViewModel}">
+            <local:HttpView />
+        </DataTemplate>
     </Window.Resources>
     <Grid Margin="8">
         <TabControl x:Name="tabCtrl" TabStripPlacement="Left">

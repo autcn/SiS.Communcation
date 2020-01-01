@@ -34,13 +34,13 @@
 
         /// <summary>
         /// Gets or sets the limit speed for receiving, in bytes per second. 
-        /// If the value is less or equal to 0,receiving speed control is disabled.The default is -1.
+        /// If the value is less or equal to 0,receiving speed control is disabled.The default is NotLimited.
         /// </summary>
         public int ReceiveDataMaxSpeed { get; set; } = NotLimited;
 
         /// <summary>
         /// Gets or sets the limit speed for sending, in bytes per second. 
-        /// If the value is less or equal to 0, sending speed control is disabled.The default is -1.
+        /// If the value is less or equal to 0, sending speed control is disabled.The default is NotLimited.
         /// </summary>
         public int SendDataMaxSpeed { get; set; } = NotLimited;
 

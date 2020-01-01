@@ -24,5 +24,9 @@
         public virtual ServerBaseViewModel ServerVM { get { return null; } }
         public virtual ClientBaseViewModel ClientVM { get { return null; } }
 
+        public virtual void Initialize()
+        {
+
+        }
     }
 }

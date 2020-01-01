@@ -28,6 +28,11 @@
         public int MaxPendingCount { get; set; } = 100;
 
         /// <summary>
+        /// Gets or sets the estimated max client count.The default is 100.
+        /// </summary>
+        public int MaxClientCount { get; set; } = 100;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the message can be sent to groups that the client has not joined.
         /// </summary>
         public bool AllowCrossGroupMessage { get; set; } = true;

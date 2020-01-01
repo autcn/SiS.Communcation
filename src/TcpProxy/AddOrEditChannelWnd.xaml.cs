@@ -4,9 +4,6 @@ using TcpProxy.ViewModel;
 
 namespace TcpProxy
 {
-    /// <summary>
-    /// AddOrEditChannelWnd.xaml 的交互逻辑
-    /// </summary>
     public partial class AddOrEditChannelWnd : Window
     {
         public AddOrEditChannelWnd(ProxyChannelItem pi, bool isEdit)
