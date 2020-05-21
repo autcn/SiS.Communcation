@@ -81,7 +81,7 @@ namespace SiS.Communication.Demo
             IPacketSpliter customSpliter = new CustomPacketSpliter();
 
             //_tcpServer = new TcpServer();
-            _tcpServer = new TcpServer(customSpliter);
+            _tcpServer = new TcpServer(simpleSpliter);
             _tcpServer.ClientStatusChanged += OnTcpServer_ClientStatusChanged;
             _tcpServer.MessageReceived += OnTcpServer_MessageReceived;
 
@@ -176,7 +176,7 @@ namespace SiS.Communication.Demo
             IPacketSpliter customSpliter = new CustomPacketSpliter();
 
             //_tcpClient = new TcpClientEx(false);
-            _tcpClient = new TcpClientEx(false, customSpliter);
+            _tcpClient = new TcpClientEx(false, simpleSpliter);
             _tcpClient.ClientStatusChanged += OnTcpCient_ClientStatusChanged;
             _tcpClient.MessageReceived += OnTcpClient_PacketReceived;
 
