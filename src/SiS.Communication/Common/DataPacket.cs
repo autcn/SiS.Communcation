@@ -17,11 +17,6 @@ namespace SiS.Communication
         public ArraySegment<byte> Data { get; set; }
 
         /// <summary>
-        /// Gets or sets the tag of the packet.
-        /// </summary>
-        public object Tag { get; set; }
-
-        /// <summary>
         /// Gets or sets the client id of the packet.
         /// </summary>
         public long ClientID { get; set; }

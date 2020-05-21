@@ -153,7 +153,7 @@ namespace SiS.Communication.Tcp
                             {
                                 clientContext.RecvRawMessage.ClientID = (long)sockClient.Handle;
                                 clientContext.RecvRawMessage.MessageRawData = messageSegment.Data;
-                                clientContext.RecvRawMessage.Tag = messageSegment.Tag;
+                                //clientContext.RecvRawMessage.Tag = messageSegment.Tag;
                                 TcpRawMessageReceivedEventArgs rawMessage = new TcpRawMessageReceivedEventArgs()
                                 {
                                     Message = clientContext.RecvRawMessage,

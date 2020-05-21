@@ -1,5 +1,6 @@
 ﻿using SiS.Communication.Spliter;
 using SiS.Communication.Tcp;
+using System;
 using System.Linq;
 
 namespace SiS.Communication.Demo
@@ -32,6 +33,29 @@ namespace SiS.Communication.Demo
         }
     }
 
+    public class CustomPacketSpliter : FriendlyPacketSpliter
+    {
+        public override byte[] MakePacket(byte[] toSendData)
+        {
+            //| 0x01(1byte) | content-length(4bytes) |   content(nbytes) |
+            byte[] sendingPacket = new byte[toSendData.Length + 5];
+            sendingPacket[0] = 1;
+            byte[] lengthBits = BitConverter.GetBytes(toSendData.Length);
+            Buffer.BlockCopy(lengthBits, 0, sendingPacket, 1, 4);
+            Buffer.BlockCopy(toSendData, 0, sendingPacket, 5, toSendData.Length);
+            return sendingPacket;
+        }
+
+        public override int TryGetPacketSize(byte[] receivedData)
+        {
+            if (receivedData.Length >= 5)
+            {
+                return BitConverter.ToInt32(receivedData, 1) + 5;
+            }
+            return -1;
+        }
+    }
+
     public class TcpBasicServerViewModel : ServerBaseViewModel
     {
         #region Constructor
@@ -53,8 +77,11 @@ namespace SiS.Communication.Demo
             //5.packet that do not need to be split
             IPacketSpliter rawSpliter = RawPacketSpliter.Default;
 
+            //6.custom packet spliter
+            IPacketSpliter customSpliter = new CustomPacketSpliter();
+
             //_tcpServer = new TcpServer();
-            _tcpServer = new TcpServer(simpleSpliter);
+            _tcpServer = new TcpServer(customSpliter);
             _tcpServer.ClientStatusChanged += OnTcpServer_ClientStatusChanged;
             _tcpServer.MessageReceived += OnTcpServer_MessageReceived;
 
@@ -145,8 +172,11 @@ namespace SiS.Communication.Demo
             //5.packet that do not need to be split
             IPacketSpliter rawSpliter = RawPacketSpliter.Default;
 
+            //6.custom packet spliter
+            IPacketSpliter customSpliter = new CustomPacketSpliter();
+
             //_tcpClient = new TcpClientEx(false);
-            _tcpClient = new TcpClientEx(false, simpleSpliter);
+            _tcpClient = new TcpClientEx(false, customSpliter);
             _tcpClient.ClientStatusChanged += OnTcpCient_ClientStatusChanged;
             _tcpClient.MessageReceived += OnTcpClient_PacketReceived;
 
@@ -199,7 +229,6 @@ namespace SiS.Communication.Demo
                 _tcpClient.ConnectAsync("127.0.0.1", _serverPort, (isConnected) =>
                 {
                     CanConnect = !isConnected;
-                    //_tcpClient.SendText("1234567890");
                 });
             }
         }

@@ -22,7 +22,7 @@ namespace SiS.Communication.Tcp
         /// <summary>
         /// Gets or sets the tag of the message.
         /// </summary>
-        public object Tag { get; set; }
+        //public object Tag { get; set; }
 
         /// <summary>
         /// Convert the raw message to independent message.The data is stored inside the message.

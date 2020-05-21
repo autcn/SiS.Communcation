@@ -133,7 +133,7 @@ The length is a 32-bit integer in host byte order. If network byte order is used
             _tcpServer = new TcpServer(new SimplePacketSpliter(true));
 
             _tcpClientEx = new TcpClientEx(true, new SimplePacketSpliter(true));
-```  
+```
 <br>  
 
 **2.2 HeaderPacketSpliter**  
@@ -188,7 +188,47 @@ If you don't want to split data into packets, the RawPacketSpliter is a good cho
 
             _tcpClientEx = new TcpClientEx(true, RawPacketSpliter.Default);
 ```
-<br>  
+<br>
+
+**2.5 FriendlyPacketSpliter**
+
+The FriendlyPacketSpliter is an abstract class which has implemented IPacketSpliter interface. It provides two simple abstract methods for user to override. 
+
+For example, the packet structure as following:
+
+| 1byte | 4bytes | Length Bytes |
+| :---: | :----: | :----------: |
+| 0x01  | Length |   Content    |
+
+We implement a class that derived from FriendlyPacketSpliter :
+
+``` csharp
+public class CustomPacketSpliter : FriendlyPacketSpliter
+{
+    public override byte[] MakePacket(byte[] toSendData)
+    {
+        //| 0x01(1byte) | content-length(4bytes) |   content(nbytes) |
+        byte[] sendingPacket = new byte[toSendData.Length + 5];
+        sendingPacket[0] = 1;
+        byte[] lengthBits = BitConverter.GetBytes(toSendData.Length);
+        Buffer.BlockCopy(lengthBits, 0, sendingPacket, 1, 4);
+        Buffer.BlockCopy(toSendData, 0, sendingPacket, 5, toSendData.Length);
+        return sendingPacket;
+    }
+
+    public override int TryGetPacketSize(byte[] receivedData)
+    {
+        if (receivedData.Length >= 5)
+        {
+            //note: the length must be the length of entire package, include the 	header and content
+            return BitConverter.ToInt32(receivedData, 1) + 5;
+        }
+        return -1;
+    }
+}
+```
+
+Notice that the FriendlyPacketSpliter will allocate , copy and release memory everytime. So if you are implementing a high concurrency program, you should consider whether to use it. In that case, it is recommended to derive directly from the IPacketSpliter interface.
 
 ### 3. Model Transmission
 It is very easy to transfer models using this library.  
@@ -671,7 +711,7 @@ public class MyHttpHandler : HttpHandler
 }
 ```
 
-Add the hander to http server:
+Add the handler to http server:
 ``` CSharp
 _httpServer.Handlers.Add(new MyHttpHandler());
 ```
