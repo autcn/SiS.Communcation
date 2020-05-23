@@ -17,8 +17,8 @@
         /// </summary>
         public TcpServerConfig()
         {
-            ReceiveDataMaxSpeed = 10 * 1024 * 1024;
-            SendDataMaxSpeed = 10 * 1024 * 1024;
+            //ReceiveDataMaxSpeed = 10 * 1024 * 1024;
+            //SendDataMaxSpeed = 10 * 1024 * 1024;
         }
 
         /// <summary>

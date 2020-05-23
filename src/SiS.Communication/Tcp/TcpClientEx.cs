@@ -70,7 +70,10 @@ namespace SiS.Communication.Tcp
 
         #region Properties
 
-        private TcpClientConfig ClientConfig
+        /// <summary>
+        /// Gets the configuration of tcp client.
+        /// </summary>
+        public TcpClientConfig ClientConfig
         {
             get { return (TcpClientConfig)_tcpConfig; }
         }

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SiS.Communication.Business
 {
@@ -136,22 +137,23 @@ namespace SiS.Communication.Business
                 tcpClient.Tag = proxyClientID;
                 tcpClient.ClientStatusChanged += TcpClient_ClientStatusChanged;
                 tcpClient.MessageReceived += TcpClient_MessageReceived;
-                tcpClient.ConnectAsync(RemoteIP, (ushort)RemotePort, (isConnected) =>
-                 {
-                     if (isConnected)
-                     {
-                         bool isOK = _clientDict.TryAdd(proxyClientID, tcpClient);
-                         System.Diagnostics.Debug.Assert(isOK, "add new client failed");
-                     }
-                     else
-                     {
-                         _server.CloseClient(proxyClientID);
-                     }
-                     if (_waitConnDict.ContainsKey(proxyClientID))
-                     {
-                         _waitConnDict[proxyClientID].Set();
-                     }
-                 });
+                Task.Factory.StartNew(() =>
+                {
+                    bool isConnected = tcpClient.Connect(RemoteIP, (ushort)RemotePort);
+                    if (isConnected)
+                    {
+                        bool isOK = _clientDict.TryAdd(proxyClientID, tcpClient);
+                        System.Diagnostics.Debug.Assert(isOK, "add new client failed");
+                    }
+                    else
+                    {
+                        _server.CloseClient(proxyClientID);
+                    }
+                    if (_waitConnDict.ContainsKey(proxyClientID))
+                    {
+                        _waitConnDict[proxyClientID].Set();
+                    }
+                });
             }
             else if (args.Status == ClientStatus.Closed)
             {
