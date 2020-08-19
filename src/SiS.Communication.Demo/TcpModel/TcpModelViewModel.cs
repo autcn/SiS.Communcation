@@ -1,6 +1,7 @@
 ﻿using SiS.Communication.Business;
 using SiS.Communication.Tcp;
 using System;
+using System.Reflection;
 
 namespace SiS.Communication.Demo
 {
@@ -38,7 +39,7 @@ namespace SiS.Communication.Demo
 
         public TcpModelServerViewModel()
         {
-            _tcpServer = new TcpModelServer((int)MessageHeader.Model, JsonModelMessageConvert.Default);
+            _tcpServer = new TcpModelServer((int)MessageHeader.Model);
             _tcpServer.ClientStatusChanged += OnTcpServer_ClientStatusChanged;
             _tcpServer.MessageReceived += OnTcpServer_MessageReceived;
 
@@ -145,7 +146,7 @@ namespace SiS.Communication.Demo
 
         public TcpModelClientViewModel()
         {
-            _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model, JsonModelMessageConvert.Default);
+            _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model);
             _tcpClient.ClientStatusChanged += OnTcpCient_ClientStatusChanged;
             _tcpClient.MessageReceived += OnTcpClient_PacketReceived;
 

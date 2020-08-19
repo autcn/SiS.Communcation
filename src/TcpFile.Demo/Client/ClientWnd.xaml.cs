@@ -21,7 +21,7 @@ namespace TcpFile.Demo
         {
             InitializeComponent();
 
-            _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model, JsonModelMessageConvert.Default);
+            _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model);
             _tcpClient.MessageReceived += _tcpClient_MessageReceived;
             _tcpClient.ClientStatusChanged += _tcpClient_ClientStatusChanged;
         }
@@ -183,7 +183,7 @@ namespace TcpFile.Demo
 
         private void UploadProc(object obj)
         {
-            TcpModelClient uploadClient = new TcpModelClient(false, (int)MessageHeader.Model, JsonModelMessageConvert.Default);
+            TcpModelClient uploadClient = new TcpModelClient(false, (int)MessageHeader.Model);
             try
             {
                 uploadClient.Connect(ServerIPAddress, ServerPort);

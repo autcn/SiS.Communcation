@@ -1,4 +1,5 @@
-﻿using SiS.Communication.Tcp;
+﻿using SiS.Communication.Spliter;
+using SiS.Communication.Tcp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,26 +17,27 @@ namespace SiS.Communication.Business
         /// </summary>
         /// <param name="autoReconnect">True if the client can reconnect to server when disconnected automatically; otherwise, false.</param>
         /// <param name="modelHeaderIndicator">A 32-bits integer as the header to indicate the transmitted message is in the type of model.</param>
-        /// <param name="modelConvert">A converter between GeneralMessage and model.</param>
-        public TcpModelClient(bool autoReconnect, int modelHeaderIndicator, ModelMessageConvert modelConvert) : base(autoReconnect)
+        public TcpModelClient(bool autoReconnect, int modelHeaderIndicator) : this(autoReconnect, modelHeaderIndicator, new SimplePacketSpliter())
+        {
+        }
+
+        /// <summary>
+        /// Create an instance of TcpModelClient
+        /// </summary>
+        /// <param name="autoReconnect">True if the client can reconnect to server when disconnected automatically; otherwise, false.</param>
+        /// <param name="modelHeaderIndicator">A 32-bits integer as the header to indicate the transmitted message is in the type of model.</param>
+        /// <param name="packetSpliter">The spliter which is used to split stream data into packets.</param>
+        public TcpModelClient(bool autoReconnect, int modelHeaderIndicator, IPacketSpliter packetSpliter) : base(autoReconnect, packetSpliter)
         {
             _modelHeaderIndicator = modelHeaderIndicator;
-            _modelConvert = modelConvert;
             _reqResponseAgent = new RequestResponseAgent(new RelayRequestMessageSender(
-            () =>
-            {
-                return RequestTimeOut;
-            },
-            (clientID, model) =>
-            {
-                SendModelMessage(model);
-            }));
+            () => RequestTimeOut,
+            (clientID, model) => SendModelMessage(model)));
         }
         #endregion
 
         #region MyRegion
         private int _modelHeaderIndicator;
-        private ModelMessageConvert _modelConvert;
         private RequestResponseAgent _reqResponseAgent;
         #endregion
 
@@ -54,13 +56,6 @@ namespace SiS.Communication.Business
             get { return _modelHeaderIndicator; }
         }
 
-        /// <summary>
-        /// Gets the model convert.
-        /// </summary>
-        public ModelMessageConvert ModelConvert
-        {
-            get { return _modelConvert; }
-        }
         #endregion
 
         #region Protected Functions
@@ -75,7 +70,7 @@ namespace SiS.Communication.Business
             if (serverMessage.Header == _modelHeaderIndicator)
             {
                 //get model from general message
-                object model = _modelConvert.ToModel(serverMessage);
+                object model = TcpModelConverter.Default.ToModel(serverMessage);
                 //if model is response message
                 if (model is ResponseMessageBase)
                 {
@@ -96,7 +91,7 @@ namespace SiS.Communication.Business
         /// <returns>The converted model.</returns>
         public object ConvertToModel(GeneralMessage generalMessage)
         {
-            return _modelConvert.ToModel(generalMessage);
+            return TcpModelConverter.Default.ToModel(generalMessage);
         }
 
         /// <summary>
@@ -106,7 +101,7 @@ namespace SiS.Communication.Business
         /// <returns>The instance of GeneralMessage.</returns>
         public GeneralMessage ConvertToGeneralMessage(object model)
         {
-            GeneralMessage message = _modelConvert.ToMessage(model);
+            GeneralMessage message = TcpModelConverter.Default.ToMessage(model);
             message.Header = _modelHeaderIndicator;
             return message;
         }
@@ -117,7 +112,7 @@ namespace SiS.Communication.Business
         /// <param name="model">The model to be sent.</param>
         public void SendModelMessage(object model)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             SendMessage(generalMsg.Serialize());
         }
@@ -131,7 +126,7 @@ namespace SiS.Communication.Business
         /// <returns></returns>
         public IAsyncResult SendModelMessageAsync(object model, AsyncCallback callback, object state)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             return SendMessageAsync(generalMsg.Serialize(), callback, state);
         }
@@ -144,7 +139,7 @@ namespace SiS.Communication.Business
         /// <param name="loopBack">True if the message returns to the sender; otherwise false. The default is false.</param>
         public void SendGroupModelMessage(IEnumerable<string> groupNameCollection, object model, bool loopBack = false)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             SendGroupMessage(groupNameCollection, generalMsg.Serialize(), loopBack);
         }
@@ -159,7 +154,7 @@ namespace SiS.Communication.Business
         /// <param name="loopBack">True if the message returns to the sender; otherwise false. The default is false.</param>
         public IAsyncResult SendGroupModelMessageAsync(IEnumerable<string> groupNameCollection, object model, AsyncCallback callback, object state, bool loopBack = false)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             return SendGroupMessageAsync(groupNameCollection, generalMsg.Serialize(), callback, state, loopBack);
         }

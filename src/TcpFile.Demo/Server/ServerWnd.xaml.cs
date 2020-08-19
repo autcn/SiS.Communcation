@@ -19,7 +19,7 @@ namespace TcpFile.Demo
             _logWriter = new LogWriter("c:\\TcpFile.Demo.Log");
             _logWriter.OutputLevel = LogLevel.All;
 
-            _tcpServer = new TcpModelServer((int)MessageHeader.Model, JsonModelMessageConvert.Default);
+            _tcpServer = new TcpModelServer((int)MessageHeader.Model);
             _tcpServer.EnableGroup = true;
             _tcpServer.MessageReceived += _tcpServer_MessageReceived;
             _tcpServer.ClientStatusChanged += _tcpServer_ClientStatusChanged;
