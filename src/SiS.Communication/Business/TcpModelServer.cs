@@ -1,4 +1,5 @@
-﻿using SiS.Communication.Tcp;
+﻿using SiS.Communication.Spliter;
+using SiS.Communication.Tcp;
 using System;
 using System.Threading.Tasks;
 #pragma warning disable 1591
@@ -14,26 +15,31 @@ namespace SiS.Communication.Business
         /// Create an instance of TcpModelServer
         /// </summary>
         /// <param name="modelHeaderIndicator">A 32-bits integer as the header to indicate the transmitted message is in the type of model.</param>
-        /// <param name="modelConvert">A converter between GeneralMessage and model.</param>
-        public TcpModelServer(int modelHeaderIndicator, ModelMessageConvert modelConvert)
+        public TcpModelServer(int modelHeaderIndicator)
+            : this(modelHeaderIndicator, new SimplePacketSpliter())
+        {
+
+        }
+
+        /// <summary>
+        /// Create an instance of TcpModelServer
+        /// </summary>
+        /// <param name="modelHeaderIndicator">A 32-bits integer as the header to indicate the transmitted message is in the type of model.</param>
+        /// <param name="packetSpliter">The spliter used to split stream data into complete packets.</param>
+        public TcpModelServer(int modelHeaderIndicator, IPacketSpliter packetSpliter)
+            : base(packetSpliter)
         {
             _modelHeaderIndicator = modelHeaderIndicator;
-            _modelConvert = modelConvert;
-            _reqResponseAgent = new RequestResponseAgent(new RelayRequestMessageSender(
-            () =>
-            {
-                return RequestTimeOut;
-            },
-            (clientID, model) =>
-            {
-                SendModelMessage(clientID, model);
-            }));
+            _reqResponseAgent = new RequestResponseAgent(new RelayRequestMessageSender
+            (
+                    () => RequestTimeOut,
+                    (clientID, model) => SendModelMessage(clientID, model)
+            ));
         }
         #endregion
 
         #region Private Members
         private int _modelHeaderIndicator;
-        private ModelMessageConvert _modelConvert;
         private RequestResponseAgent _reqResponseAgent;
         #endregion
 
@@ -50,13 +56,6 @@ namespace SiS.Communication.Business
         {
             get { return _modelHeaderIndicator; }
         }
-        /// <summary>
-        /// Gets the model convert.
-        /// </summary>
-        public ModelMessageConvert ModelConvert
-        {
-            get { return _modelConvert; }
-        }
 
         #endregion
 
@@ -72,7 +71,7 @@ namespace SiS.Communication.Business
             if (serverMessage.Header == _modelHeaderIndicator)
             {
                 //get model from general message
-                object model = _modelConvert.ToModel(serverMessage);
+                object model = TcpModelConverter.Default.ToModel(serverMessage);
                 //if model is response message
                 if (model is ResponseMessageBase)
                 {
@@ -93,7 +92,7 @@ namespace SiS.Communication.Business
         /// <returns>The converted model.</returns>
         public object ConvertToModel(GeneralMessage generalMessage)
         {
-            return _modelConvert.ToModel(generalMessage);
+            return TcpModelConverter.Default.ToModel(generalMessage);
         }
         /// <summary>
         /// Convert model to "GeneralMessage".
@@ -102,7 +101,7 @@ namespace SiS.Communication.Business
         /// <returns>The instance of GeneralMessage.</returns>
         public GeneralMessage ConvertToGeneralMessage(object model)
         {
-            return _modelConvert.ToMessage(model);
+            return TcpModelConverter.Default.ToMessage(model);
         }
 
         /// <summary>
@@ -112,7 +111,7 @@ namespace SiS.Communication.Business
         /// <param name="model">The model to be sent.</param>
         public void SendModelMessage(long clientID, object model)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             SendMessage(clientID, generalMsg.Serialize());
         }
@@ -126,7 +125,7 @@ namespace SiS.Communication.Business
         /// <returns></returns>
         public IAsyncResult SendModelMessageAsync(long clientID, object model, AsyncCallback callback)
         {
-            GeneralMessage generalMsg = _modelConvert.ToMessage(model);
+            GeneralMessage generalMsg = TcpModelConverter.Default.ToMessage(model);
             generalMsg.Header = _modelHeaderIndicator;
             return SendMessageAsync(clientID, generalMsg.Serialize(), callback);
         }

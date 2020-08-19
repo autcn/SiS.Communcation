@@ -233,7 +233,7 @@ Notice that the FriendlyPacketSpliter will allocate , copy and release memory ev
 ### 3. Model Transmission
 It is very easy to transfer models using this library.  
 
-First, we must define a model convert. For example:
+Step1:  Define a model serializer. For example:
 
 ``` CSharp
 using Newtonsoft.Json;
@@ -245,42 +245,23 @@ using System.Linq;
 
 namespace SiS.Communication.Demo
 {
-    public class JsonModelMessageConvert : ModelMessageConvert
+    public class JsonSerializer : ISerializer
     {
-        public static JsonModelMessageConvert Default { private set; get; } = new JsonModelMessageConvert();
-        private Dictionary<string, Type> _registeredTypeDict;
-        protected override T Deserialize<T>(string text)
+        public static JsonSerializer Default { get; } = new JsonSerializer();
+        public object Deserialize(Type type, string value)
         {
-            return JsonConvert.DeserializeObject<T>(text);
+            return JsonConvert.DeserializeObject(value, type);
         }
 
-        protected override string Serialize(object obj)
+        public string Serialize(object model)
         {
-            return JsonConvert.SerializeObject(obj);
-        }
-
-        
-        protected override Dictionary<string, Type> RegisteredTypeDict
-        {
-            get
-            {
-                if (_registeredTypeDict == null)
-                {
-                    _registeredTypeDict = new Dictionary<string, Type>();
-                    List<Type> children = GetTypeDescendants(Assembly.GetExecutingAssembly(), typeof(ModelMessageBase)).ToList();
-                    foreach (Type type in children)
-                    {
-                        _registeredTypeDict.Add(type.FullName, type);
-                    }
-                }
-                return _registeredTypeDict;
-            }
+            return JsonConvert.SerializeObject(model);
         }
     }
 }
 
 ```
-Then, we define an enumeration for message header type.
+Step 2:  Define an enumeration for message header type.
 ``` CSharp
     public enum MessageHeader : int
     {
@@ -289,13 +270,25 @@ Then, we define an enumeration for message header type.
     }
 ```
 
+Step 3:  Initialize "TcpModelConverter" which is used for model convert. You must put the following code where run before using tcp model transmission.
+
+``` c#
+TcpModelConverter.Initialize(JsonSerializer.Default, typeRegister =>
+{
+    typeRegister.Register(Assembly.GetExecutingAssembly());
+});
+```
+
+
+
 The server example:
+
 ``` CSharp
 public class TcpModelServerViewModel : ServerBaseViewModel
 {
     public TcpModelServerViewModel()
     {
-        _tcpServer = new TcpModelServer((int)MessageHeader.Model, JsonModelMessageConvert.Default);
+        _tcpServer = new TcpModelServer((int)MessageHeader.Model);
         _tcpServer.ClientStatusChanged += OnTcpServer_ClientStatusChanged;
         _tcpServer.MessageReceived += OnTcpServer_MessageReceived;
     }
@@ -383,7 +376,7 @@ public class TcpModelClientViewModel : ClientBaseViewModel
 {
     public TcpModelClientViewModel()
     {
-        _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model, JsonModelMessageConvert.Default);
+        _tcpClient = new TcpModelClient(true, (int)MessageHeader.Model);
         _tcpClient.ClientStatusChanged += OnTcpCient_ClientStatusChanged;
         _tcpClient.MessageReceived += OnTcpClient_PacketReceived;
     }

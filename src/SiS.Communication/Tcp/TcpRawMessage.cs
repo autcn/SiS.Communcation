@@ -20,11 +20,6 @@ namespace SiS.Communication.Tcp
         public ArraySegment<byte> MessageRawData { get; set; }
 
         /// <summary>
-        /// Gets or sets the tag of the message.
-        /// </summary>
-        //public object Tag { get; set; }
-
-        /// <summary>
         /// Convert the raw message to independent message.The data is stored inside the message.
         /// </summary>
         /// <returns>The independent tcp message.</returns>
