@@ -37,7 +37,12 @@ namespace SiS.Communication.Business
         public GeneralMessage ToMessage(object model)
         {
             Type modelType = model.GetType();
-            string typeName = _mapper.GetRegisterName(modelType);
+            string typeName = null;
+            if (!_mapper.TryGetRegisterName(modelType, out typeName))
+            {
+                //typeName = modelType.FullName
+                throw new Exception($"The message type: {modelType.Name} has not registered.");
+            }
             GeneralMessage message = new GeneralMessage()
             {
                 MessageType = typeName,
@@ -53,7 +58,12 @@ namespace SiS.Communication.Business
         /// <returns>The converted model.</returns>
         public object ToModel(GeneralMessage message)
         {
-            Type type = _mapper.GetRegisterType(message.MessageType);
+            Type type = null;
+            if (!_mapper.TryGetRegisterType(message.MessageType, out type))
+            {
+                //type = Type.GetType(message.MessageType);
+                throw new Exception($"The message type: {message.MessageType} has not registered.");
+            }
             return _serializer.Deserialize(type, message.Body);
         }
 

@@ -1,5 +1,7 @@
 ﻿using SiS.Communication.Common;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SiS.Communication.Business
@@ -22,6 +24,28 @@ namespace SiS.Communication.Business
             return _biMap[typeName];
         }
 
+        public bool TryGetRegisterName(Type type, out string name)
+        {
+            if (!_biMap.ContainsValue(type))
+            {
+                name = null;
+                return false;
+            }
+            name = GetRegisterName(type);
+            return true;
+        }
+
+        public bool TryGetRegisterType(string typename, out Type type)
+        {
+            if (!_biMap.ContainsKey(typename))
+            {
+                type = null;
+                return false;
+            }
+            type = GetRegisterType(typename);
+            return true;
+        }
+
         public void Register(string typeName, Type type)
         {
             _biMap[typeName] = type;
@@ -30,6 +54,14 @@ namespace SiS.Communication.Business
         public void Register(Type type)
         {
             Register(type.FullName, type);
+        }
+
+        public void Register(IEnumerable<Type> types)
+        {
+            foreach (Type type in types)
+            {
+                Register(type);
+            }
         }
 
         public void Register<T>(string typeName) where T : ModelMessageBase
@@ -48,11 +80,35 @@ namespace SiS.Communication.Business
             Type baseType = typeof(ModelMessageBase);
             foreach (Type type in types)
             {
-                if (!type.IsAbstract && type.IsSubclassOf(baseType))
+                if (!type.IsAbstract && !type.IsGenericType && type.IsSubclassOf(baseType))
                 {
                     Register(type);
                 }
             }
         }
+
+        public void RegisterGeneric(Type genericType, params Type[] dataTypes)
+        {
+            foreach (Type dataType in dataTypes)
+            {
+                if (dataType.IsGenericType)
+                {
+                    throw new Exception($"The data type: {dataType.Name} can not be generic");
+                }
+                if (dataType.IsAbstract)
+                {
+                    throw new Exception($"The data type: {dataType.Name} can not be abstract");
+                }
+                Type newType = genericType.MakeGenericType(dataType);
+                Register(newType);
+            }
+        }
+
+        public void RegisterGeneric(Type genericType, IEnumerable<Type> dataTypes)
+        {
+            RegisterGeneric(genericType, dataTypes.ToArray());
+        }
+
+
     }
 }
