@@ -44,23 +44,27 @@ namespace TcpFile.Demo
 
         private void _tcpClient_ClientStatusChanged(object sender, ClientStatusChangedEventArgs args)
         {
-            if (args.Status == SiS.Communication.ClientStatus.Closed)
+            this.Dispatcher.BeginInvoke((Action)(() =>
             {
-                btnConnect.IsEnabled = true;
-                btnConnect.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DDDDDD"));
-            }
-            else if (args.Status == SiS.Communication.ClientStatus.Connecting)
-            {
-                btnConnect.IsEnabled = false;
-                btnConnect.Background = new SolidColorBrush(Colors.Orange);
-            }
-            else if (args.Status == SiS.Communication.ClientStatus.Connected)
-            {
-                btnConnect.IsEnabled = false;
-                btnConnect.Background = new SolidColorBrush(Colors.Green);
-                //join "chat" group after connected
-                _tcpClient.JoinGroup("chat");
-            }
+                if (args.Status == SiS.Communication.ClientStatus.Closed)
+                {
+                    btnConnect.IsEnabled = true;
+                    btnConnect.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DDDDDD"));
+                }
+                else if (args.Status == SiS.Communication.ClientStatus.Connecting)
+                {
+                    btnConnect.IsEnabled = false;
+                    btnConnect.Background = new SolidColorBrush(Colors.Orange);
+                }
+                else if (args.Status == SiS.Communication.ClientStatus.Connected)
+                {
+                    btnConnect.IsEnabled = false;
+                    btnConnect.Background = new SolidColorBrush(Colors.Green);
+                    //join "chat" group after connected
+                    _tcpClient.JoinGroup("chat");
+                }
+            }));
+           
         }
 
         private void _tcpClient_MessageReceived(object sender, TcpRawMessageReceivedEventArgs args)

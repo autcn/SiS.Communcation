@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 #pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
@@ -56,11 +57,13 @@ namespace SiS.Communication.Tcp
                 SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
             }
             _syncContext = SynchronizationContext.Current;
+            _mainThreadID = Thread.CurrentThread.ManagedThreadId;
         }
 
         #endregion
 
         #region Private Members
+        private int _mainThreadID;
         private Socket _clientSocket;
         // private TcpClientConfig _tcpClientConfig;
         private ManualResetEvent _reconnectWaitEvent;
@@ -211,12 +214,17 @@ namespace SiS.Communication.Tcp
                 return;
             }
             _clientStatus = status;
-            ClientStatusChanged?.Invoke(this, new ClientStatusChangedEventArgs()
+            var args = new ClientStatusChangedEventArgs()
             {
                 ClientID = _clientID,
                 IPEndPoint = (IPEndPoint)_serverEndPoint,
                 Status = _clientStatus
-            });
+            };
+
+            Task.Factory.StartNew((obj) =>
+            {
+                ClientStatusChanged?.Invoke(this, (ClientStatusChangedEventArgs)obj);
+            }, args);
         }
 
         private void AfterConnect(bool isConnected)
@@ -267,45 +275,48 @@ namespace SiS.Communication.Tcp
                 if (!_autoReconnect)
                 {
                     _isRunning = false;
-                    if (isInThread)
-                    {
-                        _syncContext.Post((state) =>
-                        {
-                            SetStatusAndNotify(ClientStatus.Closed);
-                        }, null);
-                    }
-                    else
-                    {
-                        SetStatusAndNotify(ClientStatus.Closed);
-                    }
+                    //if (isInThread)
+                    //{
+                    //    _syncContext.Post((state) =>
+                    //    {
+                    //        SetStatusAndNotify(ClientStatus.Closed);
+                    //    }, null);
+                    //}
+                    //else
+                    //{
+                    //    SetStatusAndNotify(ClientStatus.Closed);
+                    //}
+                    SetStatusAndNotify(ClientStatus.Closed);
                 }
                 else
                 {
                     if (!_isRunning)
                     {
-                        _syncContext.Post((state) =>
-                        {
-                            SetStatusAndNotify(ClientStatus.Closed);
-                        }, null);
+                        SetStatusAndNotify(ClientStatus.Closed);
+                        //_syncContext.Post((state) =>
+                        //{
+                        //    SetStatusAndNotify(ClientStatus.Closed);
+                        //}, null);
                         return;
                     }
 
-                    _syncContext.Post((state) =>
+                    SetStatusAndNotify(ClientStatus.Connecting);
+                    //_syncContext.Post((state) =>
+                    //{
+                    // AfterConnect(false);
+                    //SetStatusAndNotify(ClientStatus.Connecting);
+                    ThreadEx.Start(() =>
                     {
-                        // AfterConnect(false);
-                        SetStatusAndNotify(ClientStatus.Connecting);
-                        ThreadEx.Start(() =>
-                        {
-                            //reconnect to server 2 seconds later
-                            _reconnectWaitEvent.WaitOne(2000);
+                        //reconnect to server 2 seconds later
+                        _reconnectWaitEvent.WaitOne(2000);
 
-                            if (_isRunning)
-                            {
-                                InitClientSocket();
-                                ConnectAsyncInner(null);
-                            }
-                        });
-                    }, null);
+                        if (_isRunning)
+                        {
+                            InitClientSocket();
+                            ConnectAsyncInner(null);
+                        }
+                    });
+                    //}, null);
                 }
             }
         }
@@ -318,11 +329,11 @@ namespace SiS.Communication.Tcp
                 if (_isRunning)
                 {
                     bool isConnected = _clientSocket != null && _clientSocket.Connected;
-                    _syncContext.Post((state) =>
-                    {
-                        AfterConnect(isConnected);
-                        callback?.Invoke(isConnected);
-                    }, null);
+                    //_syncContext.Post((state) =>
+                    //{
+                    AfterConnect(isConnected);
+                    callback?.Invoke(isConnected);
+                    // }, null);
                 }
             }, null);
         }

@@ -171,6 +171,16 @@ namespace SiS.Communication.Demo
             {
                 CanConnect = true;
             }
+            if(args.Status == ClientStatus.Connected)
+            {
+                QueryServerTimeRequest request = new QueryServerTimeRequest()
+                {
+                    Name = "jackson",
+                    Message = ClientSendText
+                };
+                QueryServerTimeResponse response = _tcpClient.QueryAsync<QueryServerTimeResponse>(request).Result;
+                ClientRecvText += "server time: " + response.ServerTime.ToString() + "\r\n";
+            }
         }
 
         protected virtual void OnTcpClient_PacketReceived(object sender, TcpRawMessageReceivedEventArgs args)
@@ -194,7 +204,7 @@ namespace SiS.Communication.Demo
             }
             else
             {
-
+               
             }
         }
 
