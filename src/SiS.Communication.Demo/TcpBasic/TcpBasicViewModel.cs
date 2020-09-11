@@ -125,10 +125,10 @@ namespace SiS.Communication.Demo
         {
             if (_serverClientID > 0)
             {
-                if (!string.IsNullOrWhiteSpace(ServerSendText))
-                {
+                //if (!string.IsNullOrWhiteSpace(ServerSendText))
+                //{
                     _tcpServer.SendText(_serverClientID, ServerSendText.Trim());
-                }
+                //}
             }
         }
 
@@ -214,10 +214,10 @@ namespace SiS.Communication.Demo
 
         public override void ClientSend()
         {
-            if (!string.IsNullOrWhiteSpace(ClientSendText))
-            {
+            //if (!string.IsNullOrWhiteSpace(ClientSendText))
+            //{
                 _tcpClient.SendText(ClientSendText.Trim());
-            }
+            //}
         }
 
         public override void ConnectToServer()

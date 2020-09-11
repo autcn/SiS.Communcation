@@ -330,7 +330,7 @@ namespace SiS.Communication.Tcp
         {
             if (_isRunning)
             {
-                throw new AlreadyRunningException("the server is already running");
+                throw new AlreadyRunningException(Constants.ExMessageServerAlreadyRunning);
             }
             // _clientContextPool = new ClientContextPool(serverConfig.MaxClientCount, serverConfig.SocketAsyncBufferSize);
             Contract.Requires(listenPort > 0 && listenPort < 65535);
@@ -351,7 +351,7 @@ namespace SiS.Communication.Tcp
             }
             catch (Exception ex)
             {
-                throw new Exception("Start tcp server failed", ex);
+                throw new Exception(Constants.ExMessageStartServerFailed, ex);
             }
 
             _isRunning = true;
@@ -395,7 +395,7 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
             ClientContext clientContext = null;
             _clients.TryGetValue(clientID, out clientContext);
@@ -455,20 +455,26 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
-
+            if (count <= 0)
+            {
+                throw new ArgumentException(Constants.ExMessageCountInvalid);
+            }
+            Contract.Assert(messageData != null, Constants.ExMessageMsgDataInvalid);
+            Contract.Assert(offset >= 0, Constants.ExMessageOffsetInvalid);
             ClientContext clientContext = null;
             _clients.TryGetValue(clientID, out clientContext);
             if (clientContext == null)
             {
-                throw new Exception("the client is not exist");
+                throw new Exception(Constants.ExMessageClientNotExist);
             }
 
             if (clientContext.Status != ClientStatus.Connected)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
+            
             lock (clientContext.SendBuffer)
             {
                 ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, clientContext.SendBuffer);
@@ -509,17 +515,17 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
             ClientContext clientContext = null;// GetClient(clientID);
             _clients.TryGetValue(clientID, out clientContext);
             if (clientContext == null)
             {
-                throw new Exception("the client is not exist");
+                throw new Exception(Constants.ExMessageClientNotExist);
             }
             if (clientContext.Status != ClientStatus.Connected)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
             return SendMessageAsync(new List<long>() { clientID }, messageData, offset, count, callback).FirstOrDefault();
         }
@@ -537,8 +543,14 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
+            if (count <= 0)
+            {
+                throw new ArgumentException(Constants.ExMessageCountInvalid);
+            }
+            Contract.Assert(messageData != null, Constants.ExMessageMsgDataInvalid);
+            Contract.Assert(offset >= 0, Constants.ExMessageOffsetInvalid);
             ArraySegment<byte> packetForSend = _packetSpliter.MakePacket(messageData, offset, count, new DynamicBufferStream());
             //ArraySegment<byte>? packetForSend = null;
             List<IAsyncResult> asyncResults = new List<IAsyncResult>();
@@ -594,7 +606,7 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
             SendGroupMessageAsync(groupNameCollection, messageData, offset, count, -1);
         }
@@ -622,7 +634,7 @@ namespace SiS.Communication.Tcp
         {
             if (!_isRunning)
             {
-                throw new Exception("the server is not running");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
             return SendMessageAsync(_clients.Keys.ToList(), messageData, offset, count, callback);
         }
@@ -686,3 +698,4 @@ namespace SiS.Communication.Tcp
         #endregion
     }
 }
+

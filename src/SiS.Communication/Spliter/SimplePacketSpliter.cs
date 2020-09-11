@@ -65,7 +65,7 @@ namespace SiS.Communication.Spliter
         /// <returns>The packed byte array segment with length if UseMakePacket property is true; otherwise the input message data with doing nothing.</returns>
         public ArraySegment<byte> MakePacket(byte[] messageData, int offset, int count, DynamicBufferStream sendBuffer)
         {
-            Contract.Requires(messageData != null && count > 0);
+            Contract.Assert(messageData != null && count > 0);
             if (!UseMakePacket)
             {
                 return new ArraySegment<byte>(messageData, offset, count);

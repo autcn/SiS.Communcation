@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics.Contracts;
 #pragma warning disable 1591
 namespace SiS.Communication.Tcp
 {
@@ -457,8 +458,14 @@ namespace SiS.Communication.Tcp
         {
             if (_clientStatus != ClientStatus.Connected || _clients.Count == 0)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
+            if (count <= 0)
+            {
+                throw new ArgumentException("The count must be greater than zero.");
+            }
+            Contract.Assert(messageData != null, "The messageData can not be null");
+            Contract.Assert(offset >= 0, "The offset can not be less than zero");
             DynamicBufferStream sendBuffer = _clients.First().Value.SendBuffer;
             lock (sendBuffer)
             {
@@ -500,8 +507,14 @@ namespace SiS.Communication.Tcp
         {
             if (_clientStatus != ClientStatus.Connected || _clients.Count == 0)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
+            if (count <= 0)
+            {
+                throw new ArgumentException("The count must be greater than zero.");
+            }
+            Contract.Assert(messageData != null, "The messageData can not be null");
+            Contract.Assert(offset >= 0, "The offset can not be less than zero");
             DynamicBufferStream sendBuffer = _clients.First().Value.SendBuffer;
             lock (sendBuffer)
             {
@@ -568,7 +581,7 @@ namespace SiS.Communication.Tcp
         {
             if (_clientStatus != ClientStatus.Connected)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
             byte[] joinGroupMessage = JoinGroupMessage.MakeMessage(groupArray);
             SendMessageAsync(joinGroupMessage, null, null);
@@ -600,7 +613,7 @@ namespace SiS.Communication.Tcp
         {
             if (_clientStatus != ClientStatus.Connected)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
             if (groupNameCollection == null)
             {
@@ -639,7 +652,7 @@ namespace SiS.Communication.Tcp
         {
             if (_clientStatus != ClientStatus.Connected)
             {
-                throw new Exception("the client is not connected");
+                throw new Exception(Constants.ExMessageClientNotConnected);
             }
             if (groupNameCollection == null)
             {

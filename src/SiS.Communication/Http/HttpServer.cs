@@ -415,7 +415,7 @@ namespace SiS.Communication.Http
         {
             if (_isRunning)
             {
-                throw new AlreadyRunningException("the server is already running");
+                throw new AlreadyRunningException(Constants.ExMessageServerAlreadyRunning);
             }
             // _clientContextPool = new ClientContextPool(serverConfig.MaxClientCount, serverConfig.SocketAsyncBufferSize);
             _httpBufferPool = new ByteSegmentPool(serverConfig.TcpConfig.MaxClientCount, serverConfig.TcpConfig.SocketAsyncBufferSize);
@@ -436,7 +436,7 @@ namespace SiS.Communication.Http
             }
             catch (Exception ex)
             {
-                throw new Exception("Start tcp server failed", ex);
+                throw new Exception(Constants.ExMessageStartServerFailed, ex);
             }
 
             _isRunning = true;
@@ -1283,7 +1283,7 @@ namespace SiS.Communication.Http
         {
             if (!_isRunning)
             {
-                throw new Exception("The server is not running.");
+                throw new Exception(Constants.ExMessageServerNotRunning);
             }
             if (!client.IsConnected)
             {

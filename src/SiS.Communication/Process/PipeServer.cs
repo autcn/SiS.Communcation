@@ -19,7 +19,7 @@ namespace SiS.Communication.Process
         {
             if (_isRunning)
             {
-                throw new AlreadyRunningException("The server is already running");
+                throw new AlreadyRunningException(Constants.ExMessageServerAlreadyRunning);
             }
             if (string.IsNullOrWhiteSpace(pipeName))
             {

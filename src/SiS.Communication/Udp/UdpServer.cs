@@ -110,7 +110,7 @@ namespace SiS.Communication.Udp
         {
             if (_isRunning)
             {
-                throw new AlreadyRunningException("the server is already running");
+                throw new AlreadyRunningException(Constants.ExMessageServerAlreadyRunning);
             }
             if (nPort <= 0 || nPort >= 65535)
             {
@@ -167,7 +167,7 @@ namespace SiS.Communication.Udp
         {
             if (!_isRunning)
             {
-                throw new NotRunningException("The server is not running.");
+                throw new NotRunningException(Constants.ExMessageServerNotRunning);
             }
             _udpSender.BeginSend(messageData, length, ipEndPoint, null, null);
         }
@@ -204,7 +204,7 @@ namespace SiS.Communication.Udp
         {
             if (!_isRunning)
             {
-                throw new NotRunningException("The server is not running.");
+                throw new NotRunningException(Constants.ExMessageServerNotRunning);
             }
             if (string.IsNullOrEmpty(_multicastAddress))
             {
