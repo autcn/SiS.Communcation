@@ -412,7 +412,7 @@ namespace SiS.Communication.Tcp
         /// <summary>
         /// Close tcp client to release all the resources.
         /// </summary>
-        public void Close()
+        public virtual void Close()
         {
             if (!_isRunning)
             {

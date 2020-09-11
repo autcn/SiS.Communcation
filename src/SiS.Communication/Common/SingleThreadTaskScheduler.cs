@@ -135,6 +135,55 @@ namespace SiS.Communication
             }
         }
 
+        /// <summary>
+        /// Run as new task with this scheduler
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        /// <returns>A new task</returns>
+        public Task Run(Action action)
+        {
+            return Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, this);
+        }
+
+        /// <summary>
+        /// Run as new task with this scheduler
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="state">An object containing data to be used by the action delegate.</param>
+        /// <returns>A new task</returns>
+        public Task Run<T>(Action<T> action, T state)
+        {
+            return Task.Factory.StartNew(obj => action?.Invoke((T)obj), state, CancellationToken.None, TaskCreationOptions.None, this);
+        }
+
+        /// <summary>
+        /// Run as new task with this scheduler
+        /// </summary>
+        /// <param name="func">The function to execute.</param>
+        /// <returns>A new task with specific result type.</returns>
+        public Task<TResult> Run<TResult>(Func<TResult> func)
+        {
+            return Task.Factory.StartNew(func, CancellationToken.None, TaskCreationOptions.None, this);
+        }
+
+        /// <summary>
+        /// Run as new task with this scheduler
+        /// </summary>
+        /// <param name="func">The function to execute.</param>
+        /// /// <param name="state">An object containing data to be used by the action delegate.</param>
+        /// <returns>A new task with specific result type.</returns>
+        public Task<TResult> Run<TResult, TInput>(Func<TInput, TResult> func, TInput state)
+        {
+            return Task.Factory.StartNew(obj =>
+            {
+                if (func != null)
+                {
+                    return func((TInput)obj);
+                }
+                return default(TResult);
+            }, state, CancellationToken.None, TaskCreationOptions.None, this);
+        }
+
         #endregion
     }
 }
