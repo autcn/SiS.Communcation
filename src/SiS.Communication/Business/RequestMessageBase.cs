@@ -16,7 +16,7 @@ namespace SiS.Communication.Business
         /// </summary>
         public RequestMessageBase()
         {
-            ID = new Guid();
+            ID = Guid.NewGuid();
         }
 
         /// <summary>

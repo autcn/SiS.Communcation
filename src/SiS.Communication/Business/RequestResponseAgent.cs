@@ -80,7 +80,8 @@ namespace SiS.Communication.Business
             return Task.Factory.StartNew<T>(() =>
             {
                 RequestResponseTask task = new RequestResponseTask(requestMsg.ID);
-                _reqReponseTaskDict.TryAdd(task.TaskID, task);
+                bool isSuccess = _reqReponseTaskDict.TryAdd(task.TaskID, task);
+                Contract.Assert(isSuccess);
                 try
                 {
                     //Send request to server
